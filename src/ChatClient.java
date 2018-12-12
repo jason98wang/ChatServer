@@ -25,6 +25,8 @@ class ChatClient {
 	private PrintWriter output; // printwriter for network output
 	private boolean running = true; // thread status via boolean
 	private String username;
+	JFrame window;
+	
 	public static void main(String[] args) {
 		new ChatClient().go();
 	}
@@ -32,7 +34,7 @@ class ChatClient {
 	public void go() {
 		username = JOptionPane.showInputDialog("Enter username:");
 		
-		JFrame window = new JFrame("Chat Client");
+		window = new JFrame("Chat Client");
 		southPanel = new JPanel();
 		southPanel.setLayout(new GridLayout(2, 0));
 
@@ -146,7 +148,11 @@ class ChatClient {
 	// QuitButtonListener - Quit the program
 	class QuitButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
+			
+			output.println(username + " disconnected");
+			output.flush();
 			running = false;
+			window.dispose();
 		}
 	}
 	

@@ -113,6 +113,7 @@ class ChatServer {
 				try {
 					if (input.ready()) { // check for an incoming messge
 						msg = input.readLine(); // get a message from the client
+						System.out.println(msg);
 						for (int i = 0; i < clientList.size(); i++) {
 							clientList.get(i).output.println(msg); // echo the message back to the client ** This needs
 																	// changing for multiple clients
@@ -144,7 +145,6 @@ class ChatServer {
 		Socket client;
 		private PrintWriter output;
 		private BufferedReader input;
-		String userName;
 
 		/*
 		 * ConnectionHandler Constructor
@@ -162,10 +162,6 @@ class ChatServer {
 			}
 			running = true;
 		} // end of constructor
-		
-		Client(String userName){
-			this.userName = userName;
-		}
 
 	}
 } // end of Class
