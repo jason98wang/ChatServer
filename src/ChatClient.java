@@ -23,14 +23,14 @@ class ChatClient {
 	private BufferedReader input; //reader for network stream
 	private PrintWriter output; //printwriter for network output
 	private boolean running = true; //thread status via boolean
-	private String userName = "test";;
+	private String userName = "test";
 
 	public static void main(String[] args) {
 		new ChatClient().go();
 	}
 
 	public void go() {
-		//userName = JOptionPane.showInputDialog("Enter Your Username:");
+		userName = JOptionPane.showInputDialog("Enter Your Username:");
 		
 		JFrame window = new JFrame("Chat Client");
 		southPanel = new JPanel();
@@ -46,7 +46,8 @@ class ChatClient {
 		typeField = new JTextField(10);
 
 		msgArea = new JTextArea();
-
+		msgArea.setEditable(false);
+		JScrollPane scroll = new JScrollPane(msgArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		typeField.addActionListener(new EnterKeypress());
 
 		southPanel.add(typeField);
@@ -54,7 +55,7 @@ class ChatClient {
 		southPanel.add(errorLabel);
 		southPanel.add(clearButton);
 
-		window.add(BorderLayout.CENTER, msgArea);
+		window.add(BorderLayout.CENTER, scroll);
 		window.add(BorderLayout.SOUTH, southPanel);
 
 		window.setSize(400, 400);
