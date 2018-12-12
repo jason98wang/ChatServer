@@ -24,15 +24,19 @@ class ChatClient {
 	private PrintWriter output; //printwriter for network output
 	private boolean running = true; //thread status via boolean
 	private String userName = "test";
-
+	private JFrame window;
 	public static void main(String[] args) {
 		new ChatClient().go();
 	}
 
+//	private void login() {
+//		JFrame loginScreen = new JFrame("Login");
+//		loginScreen.setSize(500, 300);
+//		
+//	}
 	public void go() {
-		userName = JOptionPane.showInputDialog("Enter Your Username:");
-		
-		JFrame window = new JFrame("Chat Client");
+//		login();
+		window = new JFrame("Chat Client");
 		southPanel = new JPanel();
 		southPanel.setLayout(new GridLayout(2, 0));
 
@@ -131,6 +135,12 @@ class ChatClient {
 	class QuitButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
 			running = false;
+			try {
+				mySocket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			window.dispose();
 		}
 	}
 
