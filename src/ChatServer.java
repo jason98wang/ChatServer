@@ -45,11 +45,12 @@ class ChatServer {
 				clientList.add(new Client(client));
 				
 				BufferedReader br;
+				InputStreamReader stream = new InputStreamReader(client.getInputStream());
+				br = new BufferedReader(stream);
+				String userName = br.readLine();
 				for (int i = 0; i < clientList.size(); i++) {
-					
-					InputStreamReader stream = new InputStreamReader(client.getInputStream());
-					br = new BufferedReader(stream);
-					clientList.get(i).output.println(br.readLine() + " joined the chat");
+
+					clientList.get(i).output.println(userName + " joined the chat");
 					clientList.get(i).output.flush();
 				}
 				

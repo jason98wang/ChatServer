@@ -63,7 +63,7 @@ class ChatClient {
 		window.setVisible(true);
 
 		// call a method that connects to the server
-		connect("10.242.184.27", 5000);
+		connect("localhost", 5000);
 
 		// after connecting loop and keep appending[.append()] to the JTextArea
 		
@@ -76,7 +76,7 @@ class ChatClient {
 		System.out.println("Attempting to make a connection..");
 
 		try {
-			mySocket = new Socket("10.242.184.27", 5000); // attempt socket
+			mySocket = new Socket("localhost", 5000); // attempt socket
 														// connection (local
 														// address). This will
 														// wait until a
