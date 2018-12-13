@@ -8,20 +8,25 @@
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 class ChatServer {
 
 	ServerSocket serverSock;// server socket for connection
 	static Boolean running = true; // controls if the server is accepting clients
-
+	static ArrayList<String>[] privateMessages = new ArrayList[3]; 
 	public static ArrayList<Client> clientList = new ArrayList<Client>();
-
+	static ArrayList<InetAddress> bannedIps = new ArrayList<InetAddress>();
+	static HashMap<String,Client> map = new HashMap<String,Client>();
 	/**
 	 * Main
 	 * 
 	 * @param args parameters from command line
 	 */
 	public static void main(String[] args) {
+		privateMessages[0] = new ArrayList<String>();
+		privateMessages[1] = new ArrayList<String>();
+		privateMessages[2] = new ArrayList<String>();
 		new ChatServer().go(); // start the server
 	}
 
@@ -30,7 +35,7 @@ class ChatServer {
 	 */
 	public void go() {
 		System.out.println("Waiting for a client connection..");
-
+		
 		Socket client = null;// hold the client connection
 
 		try {
@@ -39,19 +44,23 @@ class ChatServer {
 			while (running) { // this loops to accept multiple clients
 				client = serverSock.accept(); // wait for connection
 
-
 				System.out.println("Client connected");
-
-				clientList.add(new Client(client));
+				if (bannedIps.contains(client.getInetAddress())) {
+					System.out.println("Banned ip tried to connect");
+					client.close();
+				}
 				
 				BufferedReader br;
 				InputStreamReader stream = new InputStreamReader(client.getInputStream());
 				br = new BufferedReader(stream);
 				String userName = br.readLine();
+				clientList.add(new Client(client,userName));
 				for (int i = 0; i < clientList.size(); i++) {
 
-					clientList.get(i).output.println(userName + " joined the chat");
+					clientList.get(i).output.println(userName);
+					clientList.get(i).output.println("/status 1");
 					clientList.get(i).output.flush();
+					
 				}
 				
 				// Note: you might want to keep references to all clients if you plan to
@@ -103,7 +112,7 @@ class ChatServer {
 		public void run() {
 
 			// Get a message from the client
-			String msg = "";
+			String msg,username;
 
 			// Send a message to the client
 
@@ -112,12 +121,56 @@ class ChatServer {
 				// loop unit a message is received
 				try {
 					if (input.ready()) { // check for an incoming messge
+						username = input.readLine();
 						msg = input.readLine(); // get a message from the client
-						System.out.println(msg);
-						for (int i = 0; i < clientList.size(); i++) {
-							clientList.get(i).output.println(msg); // echo the message back to the client ** This needs
-																	// changing for multiple clients
-							clientList.get(i).output.flush();
+//						System.out.println(msg);
+						if (msg.startsWith("/")) {
+							if (msg.startsWith("/ban")) {
+								String[] bannedClients = msg.trim().split(" ");
+								for (int i = 1; i < bannedClients.length; i++) {
+									Client banned  = map.get(bannedClients[i]);
+									bannedIps.add(banned.client.getInetAddress());
+									banned.client.close();
+								}
+							} else if (msg.startsWith("/kick")) {
+								String[] kickedClients = msg.trim().split(" ");
+								for (int i = 1; i < kickedClients.length; i++) {
+									Client kicked = map.get(kickedClients[i]);
+									kicked.client.close();
+								}
+							} else if (msg.startsWith("/msg")) {
+								String tmp = msg;
+								if (tmp.indexOf(" ") >= 0) {
+									tmp = tmp.substring(tmp.indexOf(" ") + 1);
+								} else {
+									return;
+								}
+								String user = "";
+								if (tmp.indexOf(" ") >= 0) {
+									user = tmp.substring(0, tmp.indexOf(" "));
+									tmp = tmp.substring(tmp.indexOf(" ") + 1);
+								}
+								if (!tmp.equals("")) {
+									Client messaged = map.get(user);
+									messaged.output.println("PRIVATE " + user + ": " + tmp);
+								}
+							} else if (msg.startsWith("/status")){
+								String[] read = msg.split(" ");
+								Client current = map.get(username);
+								current.status = Integer.parseInt(read[1]);
+								for (Client c : clientList) {
+									c.output.println(username);
+									c.output.println(msg);
+									c.output.flush();
+								}
+							}
+						} else {
+							for (Client c : clientList) {
+								c.output.println(username);
+								c.output.println(msg); // echo the message back to the client ** This needs
+																		// changing for multiple clients
+								c.output.flush();
+							}
 						}
 					}
 				} catch (IOException e) {
@@ -145,18 +198,26 @@ class ChatServer {
 		Socket client;
 		private PrintWriter output;
 		private BufferedReader input;
-
-		/*
+		String user;
+		int status;
+		// 1 active
+		// 2 offline
+		// 3 do not disturb
+		
+		/**
 		 * ConnectionHandler Constructor
 		 * 
 		 * @param the socket belonging to this client connection
 		 */
-		Client(Socket s) {
-			this.client = s; // constructor assigns client to this
+		Client(Socket s, String userName) {
+			user = userName;
+			map.put(user,this);
+			status = 0;
+			client = s; // constructor assigns client to this
 			try { // assign all connections to client
-				this.output = new PrintWriter(client.getOutputStream());
+				output = new PrintWriter(client.getOutputStream());
 				InputStreamReader stream = new InputStreamReader(client.getInputStream());
-				this.input = new BufferedReader(stream);
+				input = new BufferedReader(stream);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
