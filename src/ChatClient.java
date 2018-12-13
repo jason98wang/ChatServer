@@ -18,10 +18,8 @@ import java.util.HashMap;
 
 class ChatClient {
 
-	private JButton sendButton, clearButton;
 	private JTextField typeField;
 	private JTextArea msgArea;
-	private JPanel southPanel;
 	private Socket mySocket; // socket for connection
 	private BufferedReader input; // reader for network stream
 	private PrintWriter output; // printwriter for network output
@@ -30,20 +28,22 @@ class ChatClient {
 	JFrame window;
 	private ArrayList<String> blockedUsers = new ArrayList<String>();
 	private HashMap<String,String> map = new HashMap<String,String>();
+	private static ChatClient cc = new ChatClient();
 	public static void main(String[] args) {
-		new ChatClient().login();
+//		cc.login("","","");
+		cc.go("eric", "127.0.0.1", 5000);
 	}
-
-	public void login() {
+	
+	public void login(String username, String ip, String port) {
 		JFrame frame = new JFrame("Login");
 		JPanel contentPane = new JPanel();
 		JButton ok = new JButton("OK");
 		JLabel usernameLabel = new JLabel("Enter your username: ");
 		JLabel ipLabel = new JLabel("Enter IP address: ");
 		JLabel portLabel = new JLabel("Enter port: ");
-		JTextField usernameField = new JTextField();
-		JTextField ipField = new JTextField();
-		JTextField portField = new JTextField();
+		JTextField usernameField = new JTextField(username);
+		JTextField ipField = new JTextField(ip);
+		JTextField portField = new JTextField(port);
 		ok.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -55,6 +55,9 @@ class ChatClient {
 					JOptionPane.showMessageDialog(null, "Username cannot be admin!");
 					return;
 				}
+				if (ipField.getText().equals("localhost")) {
+					ipField.setText("127.0.0.1");
+				}
 				if (!ipField.getText().matches("[0-9.]+")) {
 					JOptionPane.showMessageDialog(null, "IP must only contain digits and periods!");
 					return;
@@ -64,7 +67,11 @@ class ChatClient {
 					return;
 				}
 				frame.dispose();
-				go(usernameField.getText(), ipField.getText(), Integer.parseInt(portField.getText()));
+				System.out.println(Integer.parseInt(portField.getText()));
+				
+				cc.go(usernameField.getText(), ipField.getText(), Integer.parseInt(portField.getText()));
+				
+				
 			}
 		});
 		contentPane.add(usernameLabel);
@@ -78,18 +85,19 @@ class ChatClient {
 		frame.setContentPane(contentPane);
 		frame.setSize(400, 400);
 		frame.setVisible(true);
+		
 	}
 	private DefaultListModel<String> model = new DefaultListModel<String>();
-	public void go(String username, String ip, int port) {
-		window = new JFrame("Chat Client");
-		southPanel = new JPanel();
+	public void go(String username1, String ip, int port) {
+		JFrame	window1 = new JFrame("Chat Client");
+		JPanel southPanel = new JPanel();
 		southPanel.setLayout(new GridLayout(2, 0));
-		sendButton = new JButton("SEND");
+		JButton sendButton = new JButton("SEND");
 		sendButton.addActionListener(new SendButtonListener());
-		clearButton = new JButton("QUIT");
+		JButton clearButton = new JButton("QUIT");
 		clearButton.addActionListener(new QuitButtonListener());
 		JLabel errorLabel = new JLabel("");
-
+		username = username1;
 		typeField = new JTextField(10);
 
 		msgArea = new JTextArea();
@@ -106,19 +114,22 @@ class ChatClient {
 
 		JList<String> status = new JList<String>(model);
 		JScrollPane scrollList = new JScrollPane(status,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		window.add(BorderLayout.WEST, scrollList);
-		window.add(BorderLayout.CENTER, scroll);
-		window.add(BorderLayout.SOUTH, southPanel);
-
-		window.setSize(400, 400);
-		window.setVisible(true);
-
+		
+		
+		window1.add(BorderLayout.WEST, scrollList);
+		window1.add(BorderLayout.CENTER, scroll);
+		window1.add(BorderLayout.SOUTH, southPanel);
+		window1.setSize(600, 400);
+		window1.setVisible(true);
+		
 		// call a method that connects to the server
 		connect(ip, port);
 		
 		// after connecting loop and keep appending[.append()] to the JTextArea
 
 		readMessagesFromServer();
+		
+		
 
 	}
 
@@ -127,7 +138,7 @@ class ChatClient {
 		System.out.println("Attempting to make a connection..");
 
 		try {
-			mySocket = new Socket("localhost", 5000); // attempt socket
+			mySocket = new Socket(ip, port); // attempt socket
 														// connection (local
 														// address). This will
 														// wait until a
@@ -147,8 +158,8 @@ class ChatClient {
 			output.flush();
 		} catch (IOException e) { // connection error occured
 			System.out.println("Connection to Server Failed");
-			window.dispose();
-			login();
+			//window.dispose();
+			login(username, ip, Integer.toString(port));
 			e.printStackTrace();
 		}
 
@@ -182,6 +193,7 @@ class ChatClient {
 							}
 							if (!map.containsKey(user)) {
 								model.addElement(user + " - " + statusStr);
+								msgArea.append(user + " joined the chat.\n");
 							} else {
 								for (int i = 0; i < model.size(); i++) {
 									if (model.getElementAt(i).startsWith(user + " ")) {
