@@ -25,66 +25,126 @@ class ChatClient {
 	private String username;
 	JFrame window1;
 	private ArrayList<String> blockedUsers = new ArrayList<String>();
-	private HashMap<String,String> map = new HashMap<String,String>();
-//	private static ChatClient cc = new ChatClient();
+	private HashMap<String, String> map = new HashMap<String, String>();
+
+	// Font font = new Font("TimesRoman", Font.PLAIN, 12);
+	// Font fontBold = new Font("TimesRoman", Font.BOLD, 12);
+
+	// private static ChatClient cc = new ChatClient();
 	public static void main(String[] args) {
-//		cc.login("","","");
-		new ChatClient().go("a", "localhost", 5000);
+		new ChatClient().login();
+		// new ChatClient().go("jason", "localhost", 5000);
 	}
-	
-	public void login(String username, String ip, String port) {
-		JFrame frame = new JFrame("Login");
-		JPanel contentPane = new JPanel();
-		JButton ok = new JButton("OK");
-		JLabel usernameLabel = new JLabel("Enter your username: ");
-		JLabel ipLabel = new JLabel("Enter IP address: ");
-		JLabel portLabel = new JLabel("Enter port: ");
-		JTextField usernameField = new JTextField(username);
-		JTextField ipField = new JTextField(ip);
-		JTextField portField = new JTextField(port);
-		ok.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (!usernameField.getText().matches("[a-zA-Z0-9]+")) {
-					JOptionPane.showMessageDialog(null, "Username must only contain alphanumeric characters!");
-					return;
-				}
-				if (usernameField.getText().equals("admin")) {
-					JOptionPane.showMessageDialog(null, "Username cannot be admin!");
-					return;
-				}
-				if (ipField.getText().equals("localhost")) {
-					ipField.setText("127.0.0.1");
-				}
-				if (!ipField.getText().matches("[0-9.]+")) {
-					JOptionPane.showMessageDialog(null, "IP must only contain digits and periods!");
-					return;
-				}
-				if (!portField.getText().matches("[0-9]+")) {
-					JOptionPane.showMessageDialog(null, "Port must be a number!");
-					return;
-				}
-				frame.dispose();
-				
-				go(usernameField.getText(), ipField.getText(), Integer.parseInt(portField.getText()));
-				
-				
-			}
-		});
-		contentPane.add(usernameLabel);
-		contentPane.add(usernameField);
-		contentPane.add(ipLabel);
-		contentPane.add(ipField);
-		contentPane.add(portLabel);
-		contentPane.add(portField);
-		contentPane.add(ok);
-		contentPane.setLayout(new BoxLayout(contentPane,BoxLayout.Y_AXIS));
-		frame.setContentPane(contentPane);
-		frame.setSize(400, 400);
-		frame.setVisible(true);
+
+	public void login() {
+		// JFrame frame = new JFrame("Login");
+		// JPanel contentPane = new JPanel();
+		// JButton ok = new JButton("OK");
+		// JLabel usernameLabel = new JLabel("Enter your username: ");
+		// JLabel ipLabel = new JLabel("Enter IP address: ");
+		// JLabel portLabel = new JLabel("Enter port: ");
+		// JTextField usernameField = new JTextField(username);
+		// JTextField ipField = new JTextField(ip);
+		// JTextField portField = new JTextField(port);
+		// ok.addActionListener(new ActionListener() {
+		// @Override
+		// public void actionPerformed(ActionEvent e) {
+		// if (!usernameField.getText().matches("[a-zA-Z0-9]+")) {
+		// JOptionPane.showMessageDialog(null, "Username must only contain
+		// alphanumeric characters!");
+		// return;
+		// }
+		// if (usernameField.getText().equals("admin")) {
+		// JOptionPane.showMessageDialog(null, "Username cannot be admin!");
+		// return;
+		// }
+		// if (ipField.getText().equals("localhost")) {
+		// ipField.setText("127.0.0.1");
+		// }
+		// if (!ipField.getText().matches("[0-9.]+")) {
+		// JOptionPane.showMessageDialog(null, "IP must only contain digits and
+		// periods!");
+		// return;
+		// }
+		// if (!portField.getText().matches("[0-9]+")) {
+		// JOptionPane.showMessageDialog(null, "Port must be a number!");
+		// return;
+		// }
+		// frame.dispose();
+		//
+		// go(usernameField.getText(), ipField.getText(),
+		// Integer.parseInt(portField.getText()));
+		//
+		//
+		// }
+		// });
+		// contentPane.add(usernameLabel);
+		// contentPane.add(usernameField);
+		// contentPane.add(ipLabel);
+		// contentPane.add(ipField);
+		// contentPane.add(portLabel);
+		// contentPane.add(portField);
+		// contentPane.add(ok);
+		// contentPane.setLayout(new BoxLayout(contentPane,BoxLayout.Y_AXIS));
+		// frame.setContentPane(contentPane);
+		// frame.setSize(400, 400);
+		// frame.setVisible(true);
+		//
+
+		// if (!usernameField.getText().matches("[a-zA-Z0-9]+")) {
+		// JOptionPane.showMessageDialog(null, "Username must only contain
+		// alphanumeric characters!");
+		// return;
+		// }
+		// if (usernameField.getText().equals("admin")) {
+		// JOptionPane.showMessageDialog(null, "Username cannot be admin!");
+		// return;
+		// }
+		// if (ipField.getText().equals("localhost")) {
+		// ipField.setText("127.0.0.1");
+		// }
+		// if (!ipField.getText().matches("[0-9.]+")) {
+		// JOptionPane.showMessageDialog(null, "IP must only contain digits and
+		// periods!");
+		// return;
+		// }
+		// if (!portField.getText().matches("[0-9]+")) {
+		// JOptionPane.showMessageDialog(null, "Port must be a number!");
+		// return;
+		// }
+
+		String userName = JOptionPane.showInputDialog("Plesae enter your userName(Without spaces)");
+		userName = userName.trim();
+
+		if (!userName.matches("[a-zA-Z0-9]+")) {
+			JOptionPane.showMessageDialog(null, "Username must only contain alphanumeric characters!");
+			login();
+			return;
+		}
 		
+		String ipAddress = JOptionPane.showInputDialog("Plesae enter ip address");
+		if (ipAddress.equals("localhost")) {
+			ipAddress = "127.0.0.1";
+		}
+		
+		if (!ipAddress.matches("[0-9.]+")) {
+			JOptionPane.showMessageDialog(null, "IP must only contain digits and periods!");
+			login();
+			return;
+		}
+		
+		String socketNum = JOptionPane.showInputDialog("Plesae enter your socket");
+		if (!socketNum.matches("[0-9]+")) {
+			JOptionPane.showMessageDialog(null, "Port must be a number!");
+			login();
+			return;
+		}
+
+		go(userName, ipAddress, Integer.parseInt(socketNum));
 	}
+
 	private JList<String> status;
+
 	public void go(String username1, String ip, int port) {
 		window1 = new JFrame("Chat Client");
 		JPanel southPanel = new JPanel();
@@ -110,10 +170,10 @@ class ChatClient {
 		southPanel.add(clearButton);
 		DefaultListModel<String> model = new DefaultListModel<String>();
 		status = new JList<String>(model);
-		
-		JScrollPane scrollList = new JScrollPane(status,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		
-		
+
+		JScrollPane scrollList = new JScrollPane(status, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
 		window1.add(BorderLayout.WEST, scrollList);
 		window1.add(BorderLayout.CENTER, scroll);
 		window1.add(BorderLayout.SOUTH, southPanel);
@@ -121,15 +181,13 @@ class ChatClient {
 		window1.setVisible(true);
 		// call a method that connects to the server
 		connect(ip, port);
-		
+
 		running = true;
 		blockedUsers = new ArrayList<String>();
-		map = new HashMap<String,String>();
+		map = new HashMap<String, String>();
 		// after connecting loop and keep appending[.append()] to the JTextArea
 		window1.revalidate();
 		readMessagesFromServer();
-		
-		
 
 	}
 
@@ -139,10 +197,10 @@ class ChatClient {
 
 		try {
 			mySocket = new Socket(ip, port); // attempt socket
-														// connection (local
-														// address). This will
-														// wait until a
-														// connection is made
+												// connection (local
+												// address). This will
+												// wait until a
+												// connection is made
 
 			InputStreamReader stream1 = new InputStreamReader(mySocket.getInputStream()); // Stream
 																							// for
@@ -158,8 +216,8 @@ class ChatClient {
 			output.println(username);
 			output.flush();
 			((DefaultListModel<String>) status.getModel()).addElement(username + " - Active");
-			map.put(username,"Active");
-			while(true) {
+			map.put(username, "Active");
+			while (true) {
 				String username = input.readLine();
 				if (username.equals("")) {
 					break;
@@ -178,8 +236,8 @@ class ChatClient {
 			}
 		} catch (IOException e) { // connection error occured
 			System.out.println("Connection to Server Failed");
-			//window.dispose();
-			login(username, ip, Integer.toString(port));
+			// window.dispose();
+			login();
 			e.printStackTrace();
 		}
 
@@ -197,11 +255,34 @@ class ChatClient {
 				if (input.ready()) { // check for an incoming messge
 					String msg, user;
 					user = input.readLine();
-					if (!blockedUsers.contains(user)) {
+					if (!blockedUsers.contains(user) && !user.equals("admin")) {
 						msg = input.readLine(); // read the message
+						if (user.equals("admin") && msg.startsWith("/")) {
+							if (msg.equals("/ban")) {
+								for (int i = 0; i < 20; i++) {
+									try {
+										Thread.sleep(50);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+									msgArea.append("YOU ARE BANNED");
+								}
+								window1.dispose();
+							} else if (msg.equals("/kick")) {
+								for (int i = 0; i < 20; i++) {
+									try {
+										Thread.sleep(50);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+									msgArea.append("YOU ARE KICKED");
+								}
+								window1.dispose();
+							}
+						}
 						if (msg.equals("")) {
 							msgArea.append(user + " disconnected.");
-						} else if (msg.startsWith("/status")){
+						} else if (msg.startsWith("/status")) {
 							int statusNum = Integer.parseInt(msg.split(" ")[1]);
 							String statusStr = "";
 							if (statusNum == 1) {
@@ -217,8 +298,10 @@ class ChatClient {
 								map.put(user, statusStr);
 							} else {
 								for (int i = 0; i < status.getModel().getSize(); i++) {
-									if (((DefaultListModel<String>) status.getModel()).getElementAt(i).startsWith(user + " ")) {
-										((DefaultListModel<String>) status.getModel()).setElementAt(user + " - " + statusStr, i);
+									if (((DefaultListModel<String>) status.getModel()).getElementAt(i)
+											.startsWith(user + " ")) {
+										((DefaultListModel<String>) status.getModel())
+												.setElementAt(user + " - " + statusStr, i);
 										map.put(user, statusStr);
 									}
 								}
@@ -226,7 +309,7 @@ class ChatClient {
 						} else {
 							msgArea.append(user + ": " + msg + "\n");
 						}
-					
+
 					}
 				}
 
@@ -316,7 +399,6 @@ class ChatClient {
 			output.println(username);
 			output.println("/status 2");
 			output.println(username);
-			//msgArea.append(username + "userDisconnected");
 			output.println();
 			output.flush();
 			running = false;

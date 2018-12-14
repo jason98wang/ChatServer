@@ -137,12 +137,16 @@ class ChatServer {
 								for (int i = 1; i < bannedClients.length; i++) {
 									Client banned  = map.get(bannedClients[i]);
 									bannedIps.add(banned.client.getInetAddress());
+									banned.output.println("admin");
+									banned.output.println("/ban");
 									banned.client.close();
 								}
 							} else if (msg.startsWith("/kick")) {
 								String[] kickedClients = msg.trim().split(" ");
 								for (int i = 1; i < kickedClients.length; i++) {
 									Client kicked = map.get(kickedClients[i]);
+									kicked.output.println("admin");
+									kicked.output.println("/kick");
 									kicked.client.close();
 								}
 							} else if (msg.startsWith("/msg")) {
@@ -180,8 +184,7 @@ class ChatServer {
 						} else {
 							for (Client c : clientList) {
 								c.output.println(username);
-								c.output.println(msg); // echo the message back to the client ** This needs
-																		// changing for multiple clients
+								c.output.println(msg); // echo the message back to the client ** This needs changing for multiple clients
 								c.output.flush();
 							}
 						}
