@@ -23,13 +23,13 @@ class ChatClient {
 	private PrintWriter output; // printwriter for network output
 	private boolean running; // thread status via boolean
 	private String username;
-	JFrame window;
+	JFrame window1;
 	private ArrayList<String> blockedUsers = new ArrayList<String>();
 	private HashMap<String,String> map = new HashMap<String,String>();
 //	private static ChatClient cc = new ChatClient();
 	public static void main(String[] args) {
 //		cc.login("","","");
-		new ChatClient().go("admin", "localhost", 5000);
+		new ChatClient().go("a", "localhost", 5000);
 	}
 	
 	public void login(String username, String ip, String port) {
@@ -86,7 +86,7 @@ class ChatClient {
 	}
 	private JList<String> status;
 	public void go(String username1, String ip, int port) {
-		JFrame	window1 = new JFrame("Chat Client");
+		window1 = new JFrame("Chat Client");
 		JPanel southPanel = new JPanel();
 		southPanel.setLayout(new GridLayout(2, 0));
 		JButton sendButton = new JButton("SEND");
@@ -316,10 +316,11 @@ class ChatClient {
 			output.println(username);
 			output.println("/status 2");
 			output.println(username);
+			//msgArea.append(username + "userDisconnected");
 			output.println();
 			output.flush();
 			running = false;
-			window.dispose();
+			window1.dispose();
 		}
 	}
 
