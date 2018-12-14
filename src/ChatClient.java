@@ -11,8 +11,6 @@ import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.awt.*;
-import javax.swing.*;
 import java.awt.event.*;
 import java.util.HashMap;
 
@@ -23,15 +21,15 @@ class ChatClient {
 	private Socket mySocket; // socket for connection
 	private BufferedReader input; // reader for network stream
 	private PrintWriter output; // printwriter for network output
-	private boolean running = true; // thread status via boolean
+	private boolean running; // thread status via boolean
 	private String username;
 	JFrame window;
 	private ArrayList<String> blockedUsers = new ArrayList<String>();
 	private HashMap<String,String> map = new HashMap<String,String>();
-	private static ChatClient cc = new ChatClient();
+//	private static ChatClient cc = new ChatClient();
 	public static void main(String[] args) {
 //		cc.login("","","");
-		cc.go("eric", "127.0.0.1", 5000);
+		new ChatClient().go("admin", "localhost", 5000);
 	}
 	
 	public void login(String username, String ip, String port) {
@@ -67,9 +65,8 @@ class ChatClient {
 					return;
 				}
 				frame.dispose();
-				System.out.println(Integer.parseInt(portField.getText()));
 				
-				cc.go(usernameField.getText(), ipField.getText(), Integer.parseInt(portField.getText()));
+				go(usernameField.getText(), ipField.getText(), Integer.parseInt(portField.getText()));
 				
 				
 			}
@@ -87,7 +84,7 @@ class ChatClient {
 		frame.setVisible(true);
 		
 	}
-	private DefaultListModel<String> model = new DefaultListModel<String>();
+	private JList<String> status;
 	public void go(String username1, String ip, int port) {
 		JFrame	window1 = new JFrame("Chat Client");
 		JPanel southPanel = new JPanel();
@@ -111,8 +108,9 @@ class ChatClient {
 		southPanel.add(sendButton);
 		southPanel.add(errorLabel);
 		southPanel.add(clearButton);
-
-		JList<String> status = new JList<String>(model);
+		DefaultListModel<String> model = new DefaultListModel<String>();
+		status = new JList<String>(model);
+		
 		JScrollPane scrollList = new JScrollPane(status,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		
 		
@@ -121,12 +119,14 @@ class ChatClient {
 		window1.add(BorderLayout.SOUTH, southPanel);
 		window1.setSize(600, 400);
 		window1.setVisible(true);
-		
 		// call a method that connects to the server
 		connect(ip, port);
 		
+		running = true;
+		blockedUsers = new ArrayList<String>();
+		map = new HashMap<String,String>();
 		// after connecting loop and keep appending[.append()] to the JTextArea
-
+		window1.revalidate();
 		readMessagesFromServer();
 		
 		
@@ -154,8 +154,28 @@ class ChatClient {
 																	// to
 																	// network
 																	// stream
+			msgArea.append(username + " has joined the chat.\n");
 			output.println(username);
 			output.flush();
+			((DefaultListModel<String>) status.getModel()).addElement(username + " - Active");
+			map.put(username,"Active");
+			while(true) {
+				String username = input.readLine();
+				if (username.equals("")) {
+					break;
+				}
+				int statusNum = Integer.parseInt(input.readLine());
+				String statusStr = "";
+				if (statusNum == 1) {
+					statusStr = "Active";
+				} else if (statusNum == 2) {
+					statusStr = "Offline";
+				} else if (statusNum == 3) {
+					statusStr = "Do not disturb";
+				}
+				((DefaultListModel<String>) status.getModel()).addElement(username + " - " + statusStr);
+				map.put(username, statusStr);
+			}
 		} catch (IOException e) { // connection error occured
 			System.out.println("Connection to Server Failed");
 			//window.dispose();
@@ -182,22 +202,24 @@ class ChatClient {
 						if (msg.equals("")) {
 							msgArea.append(user + " disconnected.");
 						} else if (msg.startsWith("/status")){
-							int status = Integer.parseInt(msg.split(" ")[1]);
+							int statusNum = Integer.parseInt(msg.split(" ")[1]);
 							String statusStr = "";
-							if (status == 1) {
+							if (statusNum == 1) {
 								statusStr = "Active";
-							} else if (status == 2) {
+							} else if (statusNum == 2) {
 								statusStr = "Offline";
-							} else if (status == 3) {
+							} else if (statusNum == 3) {
 								statusStr = "Do not disturb";
 							}
 							if (!map.containsKey(user)) {
-								model.addElement(user + " - " + statusStr);
+								((DefaultListModel<String>) status.getModel()).addElement(user + " - " + statusStr);
 								msgArea.append(user + " joined the chat.\n");
+								map.put(user, statusStr);
 							} else {
-								for (int i = 0; i < model.size(); i++) {
-									if (model.getElementAt(i).startsWith(user + " ")) {
-										model.setElementAt(user + " - " + statusStr, i);
+								for (int i = 0; i < status.getModel().getSize(); i++) {
+									if (((DefaultListModel<String>) status.getModel()).getElementAt(i).startsWith(user + " ")) {
+										((DefaultListModel<String>) status.getModel()).setElementAt(user + " - " + statusStr, i);
+										map.put(user, statusStr);
 									}
 								}
 							}
@@ -255,7 +277,11 @@ class ChatClient {
 				} else if (msg.startsWith("/block")) {
 					String[] block = msg.trim().split(" ");
 					for (int i = 1; i < block.length; i++) {
-						blockedUsers.add(block[i]);
+						if (blockedUsers.contains(block[i])) {
+							blockedUsers.remove(block[i]);
+						} else {
+							blockedUsers.add(block[i]);
+						}
 					}
 				} else if (msg.startsWith("/msg")) {
 					output.println(username);
@@ -287,6 +313,8 @@ class ChatClient {
 	// QuitButtonListener - Quit the program
 	class QuitButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
+			output.println(username);
+			output.println("/status 2");
 			output.println(username);
 			output.println();
 			output.flush();
@@ -326,7 +354,11 @@ class ChatClient {
 				} else if (msg.startsWith("/block")) {
 					String[] block = msg.trim().split(" ");
 					for (int i = 1; i < block.length; i++) {
-						blockedUsers.add(block[i]);
+						if (blockedUsers.contains(block[i])) {
+							blockedUsers.remove(block[i]);
+						} else {
+							blockedUsers.add(block[i]);
+						}
 					}
 				} else if (msg.startsWith("/msg")) {
 					output.println(username);

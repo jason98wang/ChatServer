@@ -14,7 +14,6 @@ class ChatServer {
 
 	ServerSocket serverSock;// server socket for connection
 	static Boolean running = true; // controls if the server is accepting clients
-	static ArrayList<String>[] privateMessages = new ArrayList[3]; 
 	public static ArrayList<Client> clientList = new ArrayList<Client>();
 	static ArrayList<InetAddress> bannedIps = new ArrayList<InetAddress>();
 	static HashMap<String,Client> map = new HashMap<String,Client>();
@@ -24,9 +23,6 @@ class ChatServer {
 	 * @param args parameters from command line
 	 */
 	public static void main(String[] args) {
-		privateMessages[0] = new ArrayList<String>();
-		privateMessages[1] = new ArrayList<String>();
-		privateMessages[2] = new ArrayList<String>();
 		new ChatServer().go(); // start the server
 	}
 
@@ -41,6 +37,7 @@ class ChatServer {
 		try {
 			serverSock = new ServerSocket(5000); // assigns an port to the server
 			serverSock.setSoTimeout(30000); // 15 second timeout
+			
 			while (running) { // this loops to accept multiple clients
 				client = serverSock.accept(); // wait for connection
 
@@ -54,14 +51,24 @@ class ChatServer {
 				InputStreamReader stream = new InputStreamReader(client.getInputStream());
 				br = new BufferedReader(stream);
 				String userName = br.readLine();
-				clientList.add(new Client(client,userName));
+				if (map.containsKey(userName)) {
+					client.close();
+				}
+				PrintWriter pw = new PrintWriter(client.getOutputStream());
+				
 				for (int i = 0; i < clientList.size(); i++) {
-
+					pw.println(clientList.get(i).user);
+					pw.println(clientList.get(i).status);
 					clientList.get(i).output.println(userName);
 					clientList.get(i).output.println("/status 1");
 					clientList.get(i).output.flush();
 					
 				}
+				
+				clientList.add(new Client(client,userName));
+				pw.println("");
+				pw.flush();
+				
 				
 				// Note: you might want to keep references to all clients if you plan to
 				// broadcast messages
@@ -110,12 +117,12 @@ class ChatServer {
 		 * run executed on start of thread
 		 */
 		public void run() {
-
 			// Get a message from the client
 			String msg,username;
 
 			// Send a message to the client
-
+			
+			
 			// Get a message from the client
 			while (running) {
 				// loop unit a message is received
@@ -152,7 +159,13 @@ class ChatServer {
 								}
 								if (!tmp.equals("")) {
 									Client messaged = map.get(user);
-									messaged.output.println("PRIVATE " + user + ": " + tmp);
+									Client sent = map.get(username);
+									messaged.output.println("FROM: " + username);
+									messaged.output.println(tmp);
+									messaged.output.flush();
+									sent.output.println("TO: " +  user);
+									sent.output.println(tmp);
+									sent.output.flush();
 								}
 							} else if (msg.startsWith("/status")){
 								String[] read = msg.split(" ");
@@ -212,7 +225,7 @@ class ChatServer {
 		Client(Socket s, String userName) {
 			user = userName;
 			map.put(user,this);
-			status = 0;
+			status = 1;
 			client = s; // constructor assigns client to this
 			try { // assign all connections to client
 				output = new PrintWriter(client.getOutputStream());
