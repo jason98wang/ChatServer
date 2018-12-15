@@ -121,18 +121,18 @@ class ChatClient {
 			login();
 			return;
 		}
-		
+
 		String ipAddress = JOptionPane.showInputDialog("Plesae enter ip address");
 		if (ipAddress.equals("localhost")) {
 			ipAddress = "127.0.0.1";
 		}
-		
+
 		if (!ipAddress.matches("[0-9.]+")) {
 			JOptionPane.showMessageDialog(null, "IP must only contain digits and periods!");
 			login();
 			return;
 		}
-		
+
 		String socketNum = JOptionPane.showInputDialog("Plesae enter your socket");
 		if (!socketNum.matches("[0-9]+")) {
 			JOptionPane.showMessageDialog(null, "Port must be a number!");
@@ -237,7 +237,7 @@ class ChatClient {
 		} catch (IOException e) { // connection error occured
 			System.out.println("Connection to Server Failed");
 			window1.dispose();
-			login();
+			JOptionPane.showMessageDialog(null,"You have been disconnected");
 			e.printStackTrace();
 		}
 
@@ -255,8 +255,8 @@ class ChatClient {
 				if (input.ready()) { // check for an incoming messge
 					String msg, user;
 					user = input.readLine();
+					msg = input.readLine(); // read the message
 					if (!blockedUsers.contains(user) || user.equals("admin")) {
-						msg = input.readLine(); // read the message
 						if (user.equals("admin") && msg.startsWith("/")) {
 							if (msg.equals("/ban")) {
 								for (int i = 0; i < 20; i++) {
@@ -268,7 +268,8 @@ class ChatClient {
 									msgArea.append("YOU ARE BANNED");
 								}
 								window1.dispose();
-								login();
+								JOptionPane.showMessageDialog(null, "You have been banned");
+								//login();
 							} else if (msg.equals("/kick")) {
 								for (int i = 0; i < 20; i++) {
 									try {
@@ -279,7 +280,8 @@ class ChatClient {
 									msgArea.append("YOU ARE KICKED\n");
 								}
 								window1.dispose();
-								login();
+								JOptionPane.showMessageDialog(null, "You have been Kicked");
+								//login();
 							}
 						}
 						if (msg.equals("")) {
@@ -369,7 +371,7 @@ class ChatClient {
 							blockedUsers.add(block[i]);
 							msgArea.append("Blocked " + block[i] + "\n");
 						}
-						
+
 					}
 				} else if (msg.startsWith("/msg")) {
 					output.println(username);
@@ -408,7 +410,7 @@ class ChatClient {
 			output.flush();
 			running = false;
 			window1.dispose();
-			login();
+			//login();
 		}
 	}
 
@@ -450,7 +452,7 @@ class ChatClient {
 							blockedUsers.add(block[i]);
 							msgArea.append("Blocked " + block[i] + "\n");
 						}
-						
+
 					}
 				} else if (msg.startsWith("/msg")) {
 					output.println(username);
@@ -478,4 +480,5 @@ class ChatClient {
 			typeField.setText("");
 		}
 
+	}
 }
