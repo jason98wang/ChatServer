@@ -1,7 +1,7 @@
 /* [ChatServer.java]
- * You will need to modify this so that received messages are broadcast to all clients
- * @author Mangat
- * @ version 1.0a
+ * Chat server that broadcasts messages to all clients and handles various commands
+ * Author: Jason Wang, Eric Long 
+ * December 10, 2018
  */
 
 //imports for network communication
@@ -10,16 +10,20 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.JOptionPane;
+
 class ChatServer {
 
+	//Declaring variables
 	ServerSocket serverSock;// server socket for connection
 	static Boolean running = true; // controls if the server is accepting clients
 	public static ArrayList<Client> clientList = new ArrayList<Client>();
 	static ArrayList<InetAddress> bannedIps = new ArrayList<InetAddress>();
 	static HashMap<String,Client> map = new HashMap<String,Client>();
+	
 	/**
 	 * Main
-	 * 
+	 * Runs the server
 	 * @param args parameters from command line
 	 */
 	public static void main(String[] args) {
@@ -27,35 +31,58 @@ class ChatServer {
 	}
 
 	/**
-	 * Go Starts the server
+	 * Go 
+	 * Starts the server
 	 */
 	public void go() {
-		System.out.println("Waiting for a client connection..");
+
+		//allowing the user to choose the port to connect to 
+		String portNum ="";
+		while(!portNum.matches("[0-9]+")){
+			portNum = JOptionPane.showInputDialog("Please enter the port number");
+		}
 		
-		Socket client = null;// hold the client connection
+		//displaying the server Ip for clients to connect to
+		try {
+			InetAddress ip = InetAddress.getLocalHost();
+			JOptionPane.showMessageDialog(null, "Server IP: " + ip);
+		} catch (UnknownHostException e2) {
+			JOptionPane.showMessageDialog(null, "Error receiving Ip Address");
+		}
+		
+		System.out.println("Waiting for a client connection..");
+		// hold the client connection
+		Socket client = null;
 
 		try {
-			serverSock = new ServerSocket(5000); // assigns an port to the server
+			// assigns an port to the server
+			serverSock = new ServerSocket(Integer.parseInt(portNum)); 
 			//serverSock.setSoTimeout(30000); // 15 second timeout
 			
 			while (running) { // this loops to accept multiple clients
 				client = serverSock.accept(); // wait for connection
 
+				//if the user is on the banned list, refuse the connection
 				System.out.println("Client connected");
 				if (bannedIps.contains(client.getInetAddress())) {
-					System.out.println("Banned ip tried to connect");
+					JOptionPane.showMessageDialog(null,"Banned ip tried to connect");
 					client.close();
 				}
 				
+				//establishing input streams 
 				BufferedReader br;
 				InputStreamReader stream = new InputStreamReader(client.getInputStream());
 				br = new BufferedReader(stream);
 				String userName = br.readLine();
+				
+				//if the userName is already in use close client 
 				if (map.containsKey(userName)) {
 					client.close();
 				}
+				
 				PrintWriter pw = new PrintWriter(client.getOutputStream());
 				
+				//add the client to the client list and set as active
 				for (Client c : clientList) {
 					pw.println(c.user);
 					pw.println(c.status);
@@ -65,14 +92,12 @@ class ChatServer {
 					
 				}
 				
+				//add the client to the client list
 				clientList.add(new Client(client,userName));
 				pw.println("");
 				pw.flush();
 				
-				
-				// Note: you might want to keep references to all clients if you plan to
-				// broadcast messages
-				// Also: Queues are good tools to buffer incoming/outgoing messages
+			
 				Thread t = new Thread(new ConnectionHandler(client)); // create a thread for the new client and pass in
 																		// the socket
 				t.start(); // start the new thread
@@ -114,13 +139,12 @@ class ChatServer {
 		} // end of constructor
 
 		/*
-		 * run executed on start of thread
+		 * run 
+		 * executed on start of thread
 		 */
 		public void run() {
 			// Get a message from the client
 			String msg,username;
-
-			// Send a message to the client
 			
 			
 			// Get a message from the client
@@ -128,11 +152,11 @@ class ChatServer {
 				// loop unit a message is received
 				try {
 					if (input.ready()) { // check for an incoming messge
-						username = input.readLine();
+						username = input.readLine(); //get userName from client
 						msg = input.readLine(); // get a message from the client
-//						System.out.println(msg);
+						//check if the message is a command 
 						if (msg.startsWith("/")) {
-							if (msg.startsWith("/ban")) {
+							if (msg.startsWith("/ban")) { //ban the user
 								String[] bannedClients = msg.trim().split(" ");
 								for (int i = 1; i < bannedClients.length; i++) {
 									Client banned  = map.get(bannedClients[i]);
@@ -142,7 +166,7 @@ class ChatServer {
 									banned.output.flush();
 									banned.client.close();
 								}
-							} else if (msg.startsWith("/kick")) {
+							} else if (msg.startsWith("/kick")) { //kick the user
 								String[] kickedClients = msg.trim().split(" ");
 								for (int i = 1; i < kickedClients.length; i++) {
 									Client kicked = map.get(kickedClients[i]);
@@ -151,7 +175,7 @@ class ChatServer {
 									kicked.output.flush();
 									kicked.client.close();
 								}
-							} else if (msg.startsWith("/msg")) {
+							} else if (msg.startsWith("/msg")) { //send private message to a user
 								String tmp = msg;
 								if (tmp.indexOf(" ") >= 0) {
 									tmp = tmp.substring(tmp.indexOf(" ") + 1);
@@ -173,7 +197,7 @@ class ChatServer {
 									sent.output.println(tmp);
 									sent.output.flush();
 								}
-							} else if (msg.startsWith("/status")){
+							} else if (msg.startsWith("/status")){ //change user status
 								String[] read = msg.split(" ");
 								Client current = map.get(username);
 								current.status = Integer.parseInt(read[1]);
@@ -184,9 +208,11 @@ class ChatServer {
 								}
 							}
 						} else {
+							//if not special command send message to everyone 
 							for (Client c : clientList) {
+								//output to be received by the client
 								c.output.println(username);
-								c.output.println(msg); // echo the message back to the client ** This needs changing for multiple clients
+								c.output.println(msg); 
 								c.output.flush();
 							}
 						}
