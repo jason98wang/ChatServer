@@ -56,12 +56,12 @@ class ChatServer {
 				}
 				PrintWriter pw = new PrintWriter(client.getOutputStream());
 				
-				for (int i = 0; i < clientList.size(); i++) {
-					pw.println(clientList.get(i).user);
-					pw.println(clientList.get(i).status);
-					clientList.get(i).output.println(userName);
-					clientList.get(i).output.println("/status 1");
-					clientList.get(i).output.flush();
+				for (Client c : clientList) {
+					pw.println(c.user);
+					pw.println(c.status);
+					c.output.println(userName);
+					c.output.println("/status 1");
+					c.output.flush();
 					
 				}
 				
@@ -139,6 +139,7 @@ class ChatServer {
 									bannedIps.add(banned.client.getInetAddress());
 									banned.output.println("admin");
 									banned.output.println("/ban");
+									banned.output.flush();
 									banned.client.close();
 								}
 							} else if (msg.startsWith("/kick")) {
@@ -147,6 +148,7 @@ class ChatServer {
 									Client kicked = map.get(kickedClients[i]);
 									kicked.output.println("admin");
 									kicked.output.println("/kick");
+									kicked.output.flush();
 									kicked.client.close();
 								}
 							} else if (msg.startsWith("/msg")) {

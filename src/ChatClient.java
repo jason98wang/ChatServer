@@ -172,7 +172,7 @@ class ChatClient {
 		status = new JList<String>(model);
 
 		JScrollPane scrollList = new JScrollPane(status, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		window1.add(BorderLayout.WEST, scrollList);
 		window1.add(BorderLayout.CENTER, scroll);
@@ -236,7 +236,7 @@ class ChatClient {
 			}
 		} catch (IOException e) { // connection error occured
 			System.out.println("Connection to Server Failed");
-			// window.dispose();
+			window1.dispose();
 			login();
 			e.printStackTrace();
 		}
@@ -255,7 +255,7 @@ class ChatClient {
 				if (input.ready()) { // check for an incoming messge
 					String msg, user;
 					user = input.readLine();
-					if (!blockedUsers.contains(user) && !user.equals("admin")) {
+					if (!blockedUsers.contains(user) || user.equals("admin")) {
 						msg = input.readLine(); // read the message
 						if (user.equals("admin") && msg.startsWith("/")) {
 							if (msg.equals("/ban")) {
@@ -268,6 +268,7 @@ class ChatClient {
 									msgArea.append("YOU ARE BANNED");
 								}
 								window1.dispose();
+								login();
 							} else if (msg.equals("/kick")) {
 								for (int i = 0; i < 20; i++) {
 									try {
@@ -275,9 +276,10 @@ class ChatClient {
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
-									msgArea.append("YOU ARE KICKED");
+									msgArea.append("YOU ARE KICKED\n");
 								}
 								window1.dispose();
+								login();
 							}
 						}
 						if (msg.equals("")) {
@@ -362,9 +364,12 @@ class ChatClient {
 					for (int i = 1; i < block.length; i++) {
 						if (blockedUsers.contains(block[i])) {
 							blockedUsers.remove(block[i]);
+							msgArea.append("Unblocked " + block[i] + "\n");
 						} else {
 							blockedUsers.add(block[i]);
+							msgArea.append("Blocked " + block[i] + "\n");
 						}
+						
 					}
 				} else if (msg.startsWith("/msg")) {
 					output.println(username);
@@ -403,12 +408,13 @@ class ChatClient {
 			output.flush();
 			running = false;
 			window1.dispose();
+			login();
 		}
 	}
 
 	class EnterListener implements ActionListener {
 		@Override
-		public void actionPerformed(ActionEvent arg0) {
+		public void actionPerformed(ActionEvent event) {
 			// Send a message to the client
 			String msg = typeField.getText().trim();
 			if (msg.startsWith("/")) {
@@ -439,16 +445,24 @@ class ChatClient {
 					for (int i = 1; i < block.length; i++) {
 						if (blockedUsers.contains(block[i])) {
 							blockedUsers.remove(block[i]);
+							msgArea.append("Unblocked " + block[i] + "\n");
 						} else {
 							blockedUsers.add(block[i]);
+							msgArea.append("Blocked " + block[i] + "\n");
 						}
+						
 					}
 				} else if (msg.startsWith("/msg")) {
 					output.println(username);
 					output.println(msg);
 				} else if (msg.startsWith("/status")) {
-					output.println(username);
-					output.println(msg);
+					String[] split = msg.split(" ");
+					if (split.length == 2 && split[1].matches("[0-2]")) {
+						output.println(username);
+						output.println(msg);
+					} else {
+						msgArea.append("Invalid status!\n");
+					}
 				} else {
 					msgArea.append("Invalid command!\n");
 				}
@@ -463,6 +477,5 @@ class ChatClient {
 			output.flush();
 			typeField.setText("");
 		}
-	}
 
 }
