@@ -14,7 +14,6 @@ import java.net.*;
 import java.util.ArrayList;
 import java.awt.event.*;
 import java.util.HashMap;
-import java.util.Vector;
 
 class ChatClient {
 
@@ -27,8 +26,8 @@ class ChatClient {
 	private boolean running; // thread status via boolean
 	private String userName;
 	JFrame window1;
-	private Vector<String> listData;
-	private static int count = 0;
+	private JLabel label;
+	private ArrayList<JLabel> listData;
 	private ArrayList<String> blockedUsers;
 	private HashMap<String, String> map;
 
@@ -97,7 +96,7 @@ class ChatClient {
 		go(userName, ipAddress, Integer.parseInt(portNum));
 	}
 
-	private JList<String> status;
+	private JPanel status;
 
 	/**
 	 * go
@@ -110,7 +109,7 @@ class ChatClient {
 		//Creating the chat client UI
 		blockedUsers = new ArrayList<String>();
 		map = new HashMap<String,String>();
-		listData = new Vector<String>();
+		listData = new ArrayList<JLabel>();
 		window1 = new JFrame("Chat Client");
 		JPanel southPanel = new JPanel();
 		southPanel.setLayout(new GridLayout(2, 0));
@@ -135,8 +134,8 @@ class ChatClient {
 		southPanel.add(sendButton);
 		southPanel.add(errorLabel);
 		southPanel.add(clearButton);
-		status = new JList<String>();
-
+		status = new JPanel();
+		status.setLayout(new BoxLayout(status,BoxLayout.Y_AXIS));
 		//adding and setting size of scroll wheel
 		JScrollPane scrollList = new JScrollPane(status, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -184,8 +183,9 @@ class ChatClient {
 			output.flush();
 			
 			//setting status of user to active
-			listData.add(userName + " - Active");
-			status.setListData(listData);
+			label = new JLabel(userName + " - Active");
+			listData.add(label);
+			status.add(label);
 			status.revalidate();
 			status.repaint();
 			map.put(userName, "Active");
@@ -225,9 +225,9 @@ class ChatClient {
 					continue;
 				}
 				//updating the user's new status
-				System.out.println(status.getSize());
-				listData.addElement(userName + " - " + statusStr);
-				status.setListData(listData);
+				label = new JLabel(userName + " - " + statusStr);
+				listData.add(label);
+				status.add(label);
 				status.revalidate();
 				status.repaint();
 				map.put(userName, statusStr);
@@ -354,9 +354,9 @@ class ChatClient {
 							
 							// new user joining
 							if (!map.containsKey(user)) {
-								
-								listData.addElement(user + " - " + statusStr);
-								status.setListData(listData);
+								label = new JLabel(user + " - " + statusStr);
+								listData.add(label);
+								status.add(label);
 								status.revalidate();
 								status.repaint();
 								msgArea.append(user + " joined the chat.\n");
@@ -364,11 +364,9 @@ class ChatClient {
 							} else {
 									
 								// update status and not new
-								for (int i = 0; i < status.getModel().getSize(); i++) {
-									if (listData.get(i)
-											.startsWith(user + " ")) {
-										listData.setElementAt(user + " - " + statusStr, i);
-										status.setListData(listData);
+								for (int i = 0; i < listData.size(); i++) {
+									if (listData.get(i).getText().startsWith(user + " ")) {
+										listData.get(i).setText(user + " - " + statusStr);
 										status.revalidate();
 										status.repaint();
 										map.put(user, statusStr);
