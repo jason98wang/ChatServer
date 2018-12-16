@@ -88,7 +88,6 @@ class ChatServer {
 				System.out.println(userName + " joined.");
 
 				//add the client to the client list and set as active
-				System.out.println(clientList.size());
 				for (Client c : clientList) {
 					pw.println(c.user);
 					pw.println(c.status);

@@ -192,7 +192,7 @@ class ChatClient {
 			
 			// duplicate user
 			if (!S.equals("")) {
-				JOptionPane.showMessageDialog(null, userName);
+				JOptionPane.showMessageDialog(null, "Username already exists");
 				window1.dispose();
 				login();
 				running = false;
@@ -208,10 +208,8 @@ class ChatClient {
 				if (userName == null || userName.equals("")) {
 					break;
 				}
-				System.out.println("PRE" + userName);
 				//get the status that the user would like to change to
 				int statusNum = Integer.parseInt(input.readLine());
-				System.out.println(statusNum);
 				String statusStr = "";
 				//Changed user status based on the user's command
 				if (statusNum == 1) {
@@ -349,7 +347,6 @@ class ChatClient {
 							}
 							
 							// new user joining
-							System.out.println("AF" + user);
 							if (!map.containsKey(user)) {
 								
 								listData.addElement(user + " - " + statusStr);
