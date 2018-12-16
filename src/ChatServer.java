@@ -40,6 +40,7 @@ class ChatServer {
 		String portNum = "";
 		while (!portNum.matches("[0-9]+")) {
 			portNum = JOptionPane.showInputDialog("Please enter the port number");
+			System.out.println("Server started on port " + portNum);
 		}
 
 		//displaying the server Ip for clients to connect to
@@ -61,7 +62,7 @@ class ChatServer {
 				//if the user is on the banned list, refuse the connection
 				System.out.println("Client connected");
 				if (bannedIps.contains(client.getInetAddress())) {
-					JOptionPane.showMessageDialog(null, "Banned ip tried to connect");
+					System.out.println("Banned ip tried to connect");
 					client.close();
 				}
 
@@ -73,6 +74,7 @@ class ChatServer {
 				PrintWriter pw = new PrintWriter(client.getOutputStream());
 				//if the userName is already in use close client 
 				if (map.containsKey(userName)) {
+					System.out.println("User with same name as another user tried to connect.");
 					pw.println("Username exists!");
 					pw.flush();
 					client.close();
@@ -158,6 +160,7 @@ class ChatServer {
 									c.output.println(msg);
 									c.output.flush();
 								}
+								System.out.println("Server stopped");
 								// close server
 								serverSock.close();
 							} else if (msg.startsWith("/ban")) { //ban the user
@@ -171,6 +174,7 @@ class ChatServer {
 									}
 									// put in ip list
 									bannedIps.add(banned.client.getInetAddress());
+									System.out.println("Banned " + banned.user + ":" + banned.client.getInetAddress());
 									// tell banned client that they have been banned
 									banned.output.println("admin");
 									banned.output.println("/ban");
@@ -186,6 +190,7 @@ class ChatServer {
 									if (kicked == null) {
 										continue;
 									}
+									System.out.println("Kicked " + kicked.user) ;
 									// tells kicked client that they have been kicked
 									kicked.output.println("admin");
 									kicked.output.println("/kick");
@@ -225,6 +230,8 @@ class ChatServer {
 									sent.output.println("TO " + user);
 									sent.output.println(tmp);
 									sent.output.flush();
+									
+									System.out.println("Message from " + username + " to " + user + " : " + tmp);
 								}
 							} else if (msg.startsWith("/status")) { //change user status
 								String[] read = msg.split(" ");
@@ -233,6 +240,7 @@ class ChatServer {
 								// gets status and updates it
 								current.status = Integer.parseInt(read[1]);
 								
+								System.out.println(username + " status updated to " + current.status);
 								// tells all the clients that the user updated their status
 								for (Client c : clientList) {
 									c.output.println(username);
@@ -248,6 +256,7 @@ class ChatServer {
 								c.output.println(msg);
 								c.output.flush();
 							}
+							System.out.println(username + " : " + msg);
 						}
 					}
 				} catch (IOException e) {

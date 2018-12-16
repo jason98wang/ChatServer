@@ -189,7 +189,9 @@ class ChatClient {
 				
 				// get username
 				String userName = input.readLine();
-				
+				if (userName == null) {
+					break;
+				}
 				// duplicate user
 				if (userName.equals("Username exists!")) {
 					JOptionPane.showMessageDialog(null, userName);
