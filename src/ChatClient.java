@@ -40,6 +40,8 @@ class ChatClient {
 
 	public void login() {
 		
+		System.out.println(ChatServer.map);
+		
 		//getting user userName
 		String userName = JOptionPane.showInputDialog("Plesae enter your userName (Without spaces)");
 		if (userName == null) {
@@ -264,7 +266,7 @@ class ChatClient {
 							}
 						}
 						if (msg.equals("")) {
-							msgArea.append(user + " disconnected.");
+							msgArea.append(user + " disconnected.\n");
 						} else if (msg.startsWith("/status")) {
 							int statusNum = Integer.parseInt(msg.split(" ")[1]);
 							String statusStr = "";
@@ -278,7 +280,6 @@ class ChatClient {
 							if (statusStr.equals("")) {
 								break;
 							}
-							System.out.println(map);
 							if (!map.containsKey(user)) {
 								System.out.println(user);
 								((DefaultListModel<String>) status.getModel()).addElement(user + " - " + statusStr);

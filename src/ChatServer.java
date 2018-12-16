@@ -19,8 +19,8 @@ class ChatServer {
 	static Boolean running = true; // controls if the server is accepting clients
 	public static ArrayList<Client> clientList = new ArrayList<Client>();
 	static ArrayList<InetAddress> bannedIps = new ArrayList<InetAddress>();
-	static HashMap<String,Client> map = new HashMap<String,Client>();
-	
+	static HashMap<String, Client> map = new HashMap<String, Client>();
+
 	/**
 	 * Main
 	 * Runs the server
@@ -37,51 +37,47 @@ class ChatServer {
 	public void go() {
 
 		//allowing the user to choose the port to connect to 
-		String portNum ="";
-		while(!portNum.matches("[0-9]+")){
+		String portNum = "";
+		while (!portNum.matches("[0-9]+")) {
 			portNum = JOptionPane.showInputDialog("Please enter the port number");
 		}
-		
+
 		//displaying the server Ip for clients to connect to
-		try {
-			InetAddress ip = InetAddress.getLocalHost();
-			JOptionPane.showMessageDialog(null, "Server IP: " + ip);
-		} catch (UnknownHostException e2) {
-			JOptionPane.showMessageDialog(null, "Error receiving Ip Address");
-		}
-		
+		Thread t1 = new Thread(new displayServer());
+		t1.start();
+
 		System.out.println("Waiting for a client connection..");
 		// hold the client connection
 		Socket client = null;
 
 		try {
 			// assigns an port to the server
-			serverSock = new ServerSocket(Integer.parseInt(portNum)); 
+			serverSock = new ServerSocket(Integer.parseInt(portNum));
 			//serverSock.setSoTimeout(30000); // 15 second timeout
-			
+
 			while (running) { // this loops to accept multiple clients
 				client = serverSock.accept(); // wait for connection
 
 				//if the user is on the banned list, refuse the connection
 				System.out.println("Client connected");
 				if (bannedIps.contains(client.getInetAddress())) {
-					JOptionPane.showMessageDialog(null,"Banned ip tried to connect");
+					JOptionPane.showMessageDialog(null, "Banned ip tried to connect");
 					client.close();
 				}
-				
+
 				//establishing input streams 
 				BufferedReader br;
 				InputStreamReader stream = new InputStreamReader(client.getInputStream());
 				br = new BufferedReader(stream);
 				String userName = br.readLine();
-				
+
 				//if the userName is already in use close client 
 				if (map.containsKey(userName)) {
 					client.close();
 				}
-				
+
 				PrintWriter pw = new PrintWriter(client.getOutputStream());
-				
+
 				//add the client to the client list and set as active
 				for (Client c : clientList) {
 					pw.println(c.user);
@@ -89,15 +85,14 @@ class ChatServer {
 					c.output.println(userName);
 					c.output.println("/status 1");
 					c.output.flush();
-					
+
 				}
-				
+
 				//add the client to the client list
-				clientList.add(new Client(client,userName));
+				clientList.add(new Client(client, userName));
 				pw.println("");
 				pw.flush();
-				
-			
+
 				Thread t = new Thread(new ConnectionHandler(client)); // create a thread for the new client and pass in
 																		// the socket
 				t.start(); // start the new thread
@@ -144,9 +139,7 @@ class ChatServer {
 		 */
 		public void run() {
 			// Get a message from the client
-			String msg,username;
-			
-			
+			String msg, username;
 			// Get a message from the client
 			while (running) {
 				// loop unit a message is received
@@ -166,7 +159,7 @@ class ChatServer {
 							} else if (msg.startsWith("/ban")) { //ban the user
 								String[] bannedClients = msg.trim().split(" ");
 								for (int i = 1; i < bannedClients.length; i++) {
-									Client banned  = map.get(bannedClients[i]);
+									Client banned = map.get(bannedClients[i]);
 									bannedIps.add(banned.client.getInetAddress());
 									banned.output.println("admin");
 									banned.output.println("/ban");
@@ -200,11 +193,11 @@ class ChatServer {
 									messaged.output.println("FROM: " + username);
 									messaged.output.println(tmp);
 									messaged.output.flush();
-									sent.output.println("TO: " +  user);
+									sent.output.println("TO: " + user);
 									sent.output.println(tmp);
 									sent.output.flush();
 								}
-							} else if (msg.startsWith("/status")){ //change user status
+							} else if (msg.startsWith("/status")) { //change user status
 								String[] read = msg.split(" ");
 								Client current = map.get(username);
 								current.status = Integer.parseInt(read[1]);
@@ -219,7 +212,7 @@ class ChatServer {
 							for (Client c : clientList) {
 								//output to be received by the client
 								c.output.println(username);
-								c.output.println(msg); 
+								c.output.println(msg);
 								c.output.flush();
 							}
 						}
@@ -254,7 +247,7 @@ class ChatServer {
 		// 1 active
 		// 2 offline
 		// 3 do not disturb
-		
+
 		/**
 		 * ConnectionHandler Constructor
 		 * 
@@ -262,7 +255,7 @@ class ChatServer {
 		 */
 		Client(Socket s, String userName) {
 			user = userName;
-			map.put(user,this);
+			map.put(user, this);
 			status = 1;
 			client = s; // constructor assigns client to this
 			try { // assign all connections to client
@@ -275,5 +268,17 @@ class ChatServer {
 			running = true;
 		} // end of constructor
 
+	}
+
+	public class displayServer implements Runnable {
+		public void run() {
+			try {
+				InetAddress ip = InetAddress.getLocalHost();
+				JOptionPane.showMessageDialog(null, "Server IP: " + ip);
+			} catch (UnknownHostException e2) {
+				JOptionPane.showMessageDialog(null, "Error receiving Ip Address");
+			}
+			return;
+		}
 	}
 } // end of Class
