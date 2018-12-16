@@ -179,6 +179,7 @@ class ChatClient {
 			msgArea.append(userName + " has joined the chat.\n");
 			output.println(userName);
 			output.flush();
+			
 			//setting status of user to active
 			((DefaultListModel<String>) status.getModel()).addElement(userName + " - Active");
 			map.put(userName, "Active");
@@ -188,8 +189,14 @@ class ChatClient {
 				
 				// get username
 				String userName = input.readLine();
-				if (userName == null || userName.equals("")) {
-					break;
+				
+				// duplicate user
+				if (userName.equals("Username exists!")) {
+					JOptionPane.showMessageDialog(null, userName);
+					window1.dispose();
+					login();
+					running = false;
+					return null;
 				}
 				//get the status that the user would like to change to
 				int statusNum = Integer.parseInt(input.readLine());

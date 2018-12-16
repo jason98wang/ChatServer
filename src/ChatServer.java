@@ -70,13 +70,15 @@ class ChatServer {
 				InputStreamReader stream = new InputStreamReader(client.getInputStream());
 				br = new BufferedReader(stream);
 				String userName = br.readLine();
-
+				PrintWriter pw = new PrintWriter(client.getOutputStream());
 				//if the userName is already in use close client 
 				if (map.containsKey(userName)) {
+					pw.println("Username exists!");
+					pw.flush();
 					client.close();
 				}
 
-				PrintWriter pw = new PrintWriter(client.getOutputStream());
+				
 
 				//add the client to the client list and set as active
 				for (Client c : clientList) {
