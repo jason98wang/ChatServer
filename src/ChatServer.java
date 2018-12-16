@@ -185,6 +185,12 @@ class ChatServer {
 									banned.output.println("/ban");
 									banned.output.flush();
 									banned.client.close();
+									clientList.remove(banned);
+									for (Client c : clientList) {
+										c.output.println(kicked.user);
+										c.output.println("/status 2");
+										c.output.flush();
+									}
 								}
 							} else if (msg.startsWith("/kick")) { //kick the user
 								// Multiple clients can be banned
@@ -201,6 +207,12 @@ class ChatServer {
 									kicked.output.println("/kick");
 									kicked.output.flush();
 									kicked.client.close();
+									clientList.remove(kicked);
+									for (Client c : clientList) {
+										c.output.println(kicked.user);
+										c.output.println("/status 2);
+										c.output.flush();
+									}
 								}
 							} else if (msg.startsWith("/msg")) { //send private message to a user
 								String tmp = msg;
