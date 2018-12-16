@@ -1,7 +1,8 @@
 /* [ChatClient.java]
  * The chat client
- * Use username Admin to access special commands
- * @author Mangat
+ * Use userName Admin to access special commands
+ * use command /help to see all available commands 
+ * Author: Jason Wang, Eric Long
  * @ version 1.0a
  */
 
@@ -23,12 +24,11 @@ class ChatClient {
 	private BufferedReader input; // reader for network stream
 	private PrintWriter output; // printwriter for network output
 	private boolean running; // thread status via boolean
-	private String username;
+	private String userName;
 	JFrame window1;
 	private ArrayList<String> blockedUsers;
 	private HashMap<String, String> map;
 
-	// private static ChatClient cc = new ChatClient();
 	/**
 	 * Main
 	 * Runs the client interface
@@ -38,10 +38,11 @@ class ChatClient {
 		new ChatClient().login();
 	}
 
+	/**
+	 * login
+	 * Allows the user to choose userName, server IP and the port number
+	 */
 	public void login() {
-		
-		System.out.println(ChatServer.map);
-		
 		//getting user userName
 		String userName = JOptionPane.showInputDialog("Plesae enter your userName (Without spaces)");
 		if (userName == null) {
@@ -98,7 +99,7 @@ class ChatClient {
 	/**
 	 * go
 	 * Runs the chat client UI
-	 * @param username1, the username of the user
+	 * @param username1, the userName of the user
 	 * @param ip, the server Ip address the the client wants to connect to
 	 * @param port, the port that client wants to make a connection on
 	 */
@@ -114,7 +115,7 @@ class ChatClient {
 		JButton clearButton = new JButton("QUIT");
 		clearButton.addActionListener(new QuitButtonListener());
 		JLabel errorLabel = new JLabel("");
-		username = username1;
+		userName = username1;
 		typeField = new JTextField(10);
 
 		msgArea = new JTextArea();
@@ -133,6 +134,7 @@ class ChatClient {
 		DefaultListModel<String> model = new DefaultListModel<String>();
 		status = new JList<String>(model);
 
+		//adding and setting size of scroll wheel
 		JScrollPane scrollList = new JScrollPane(status, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollList.setPreferredSize(new Dimension(100,309));
@@ -173,18 +175,23 @@ class ChatClient {
 			//assign printwriter to network stream
 			output = new PrintWriter(mySocket.getOutputStream()); 
 			
-			msgArea.append(username + " has joined the chat.\n");
-			output.println(username);
+			//send new userName to server to allow all clients to see new user joining the chat
+			msgArea.append(userName + " has joined the chat.\n");
+			output.println(userName);
 			output.flush();
-			((DefaultListModel<String>) status.getModel()).addElement(username + " - Active");
-			map.put(username, "Active");
+			//setting status of user to active
+			((DefaultListModel<String>) status.getModel()).addElement(userName + " - Active");
+			map.put(userName, "Active");
+			
 			while (true) {
-				String username = input.readLine();
-				if (username.equals("")) {
+				String userName = input.readLine();
+				if (userName == null || userName.equals("")) {
 					break;
 				}
+				//get the status that the user would like to change to
 				int statusNum = Integer.parseInt(input.readLine());
 				String statusStr = "";
+				//Changed user status based on the user's command
 				if (statusNum == 1) {
 					statusStr = "Active";
 				} else if (statusNum == 2) {
@@ -195,10 +202,12 @@ class ChatClient {
 				if (statusStr.equals("")) {
 					continue;
 				}
-				((DefaultListModel<String>) status.getModel()).addElement(username + " - " + statusStr);
-				map.put(username, statusStr);
+				//updating the user's new status
+				((DefaultListModel<String>) status.getModel()).addElement(userName + " - " + statusStr);
+				map.put(userName, statusStr);
 			}
-		} catch (IOException e) { // connection error occured
+		} catch (IOException e) { // connection error occurred
+			//Show that connection to server failed 
 			System.out.println("Connection to Server Failed");
 			window1.dispose();
 			JOptionPane.showMessageDialog(null, "Connection to Server Failed");
@@ -328,30 +337,30 @@ class ChatClient {
 				if (msg.startsWith("/help") || msg.startsWith("/?")) {
 					msgArea.append("/help or /? - displays all available commands\n");
 					msgArea.append("/stop - stops the server");
-					msgArea.append("/ban username - bans ip from server\n");
-					msgArea.append("/kick username - kicks user from server\n");
-					msgArea.append("/block username - ignores all message from user\n");
-					msgArea.append("/msg username message - sends a private message to user\n");
+					msgArea.append("/ban userName - bans ip from server\n");
+					msgArea.append("/kick userName - kicks user from server\n");
+					msgArea.append("/block userName - ignores all message from user\n");
+					msgArea.append("/msg userName message - sends a private message to user\n");
 					msgArea.append("/status - sets your status");
 					msgArea.append("1 for active, 2 for offline, 3 for do not disturb\n");
 				} else if (msg.startsWith("/stop")) {
-					if (username.equals("admin")) {
+					if (userName.equals("admin")) {
 						msgArea.append("Stopping server\n");
-						output.println(username);
+						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do not have the privileges for this\n");
 					}
 				} else if (msg.startsWith("/ban")) {
-					if (username.equals("admin")) {
-						output.println(username);
+					if (userName.equals("admin")) {
+						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do not have the privileges for this\n");
 					}
 				} else if (msg.startsWith("/kick")) {
-					if (username.equals("admin")) {
-						output.println(username);
+					if (userName.equals("admin")) {
+						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do no have the privileges for this\n");
@@ -369,12 +378,12 @@ class ChatClient {
 
 					}
 				} else if (msg.startsWith("/msg")) {
-					output.println(username);
+					output.println(userName);
 					output.println(msg);
 				} else if (msg.startsWith("/status")) {
 					String[] split = msg.split(" ");
 					if (split.length == 2 && split[1].matches("[1-3]")) {
-						output.println(username);
+						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Invalid status!\n");
@@ -387,7 +396,7 @@ class ChatClient {
 				if (msg.equals("")) {
 					return;
 				}
-				output.println(username);
+				output.println(userName);
 				output.println(msg);
 			}
 			output.flush();
@@ -398,10 +407,10 @@ class ChatClient {
 	// QuitButtonListener - Quit the program
 	class QuitButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
-			output.println(username);
+			output.println(userName);
 			output.println("/status 2");
 			output.flush();
-			output.println(username);
+			output.println(userName);
 			output.println();
 			output.flush();
 			running = false;
@@ -419,30 +428,30 @@ class ChatClient {
 				if (msg.startsWith("/help") || msg.startsWith("/?")) {
 					msgArea.append("/help or /? - displays all available commands\n");
 					msgArea.append("/stop - stops the server");
-					msgArea.append("/ban username - bans ip from server\n");
-					msgArea.append("/kick username - kicks user from server\n");
-					msgArea.append("/block username - ignores all message from user\n");
-					msgArea.append("/msg username message - sends a private message to user\n");
+					msgArea.append("/ban userName - bans ip from server\n");
+					msgArea.append("/kick userName - kicks user from server\n");
+					msgArea.append("/block userName - ignores all message from user\n");
+					msgArea.append("/msg userName message - sends a private message to user\n");
 					msgArea.append("/status - sets your status");
 					msgArea.append("1 for active, 2 for offline, 3 for do not disturb\n");
 				} else if (msg.startsWith("/stop")) {
-					if (username.equals("admin")) {
+					if (userName.equals("admin")) {
 						msgArea.append("Stopping server\n");
-						output.println(username);
+						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do not have the privileges for this\n");
 					}
 				} else if (msg.startsWith("/ban")) {
-					if (username.equals("admin")) {
-						output.println(username);
+					if (userName.equals("admin")) {
+						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do not have the privileges for this\n");
 					}
 				} else if (msg.startsWith("/kick")) {
-					if (username.equals("admin")) {
-						output.println(username);
+					if (userName.equals("admin")) {
+						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do no have the privileges for this\n");
@@ -460,12 +469,12 @@ class ChatClient {
 
 					}
 				} else if (msg.startsWith("/msg")) {
-					output.println(username);
+					output.println(userName);
 					output.println(msg);
 				} else if (msg.startsWith("/status")) {
 					String[] split = msg.split(" ");
 					if (split.length == 2 && split[1].matches("[1-3]")) {
-						output.println(username);
+						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Invalid status!\n");
@@ -478,7 +487,7 @@ class ChatClient {
 				if (msg.equals("")) {
 					return;
 				}
-				output.println(username);
+				output.println(userName);
 				output.println(msg);
 			}
 			output.flush();
