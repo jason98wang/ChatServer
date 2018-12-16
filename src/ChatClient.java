@@ -96,7 +96,7 @@ class ChatClient {
 	/**
 	 * go
 	 * Runs the chat client UI
-	 * @param username1, the usernameof the user
+	 * @param username1, the username of the user
 	 * @param ip, the server Ip address the the client wants to connect to
 	 * @param port, the port that client wants to make a connection on
 	 */
@@ -133,6 +133,9 @@ class ChatClient {
 
 		JScrollPane scrollList = new JScrollPane(status, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollList.setPreferredSize(new Dimension(100,309));
+		scrollList.setMaximumSize(scrollList.getPreferredSize());
+		scrollList.setMinimumSize(scrollList.getMinimumSize());
 
 		//set window to be visible
 		window1.add(BorderLayout.WEST, scrollList);
@@ -146,6 +149,7 @@ class ChatClient {
 		running = true;
 		// after connecting loop and keep appending[.append()] to the JTextArea
 		window1.revalidate();
+		System.out.println(scrollList.getSize());
 		readMessagesFromServer();
 
 	}
