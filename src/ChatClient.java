@@ -44,7 +44,7 @@ class ChatClient {
 	 */
 	public void login() {
 		//getting user userName
-		String userName = JOptionPane.showInputDialog("Plesae enter your userName (Without spaces)");
+		String userName = JOptionPane.showInputDialog("Please enter your username (Without spaces)");
 		if (userName == null) {
 			running = false;
 			return;		
@@ -59,7 +59,7 @@ class ChatClient {
 		}
 
 		//getting the Ip address that the client want to connect to
-		String ipAddress = JOptionPane.showInputDialog("Plesae enter your Ip Address");
+		String ipAddress = JOptionPane.showInputDialog("Please enter your Ip Address");
 		if (ipAddress == null) {
 			running = false;
 			return;
@@ -78,7 +78,7 @@ class ChatClient {
 		}
 
 		//getting the port num that the user would like to connect to
-		String portNum = JOptionPane.showInputDialog("Plesae enter a port number");
+		String portNum = JOptionPane.showInputDialog("Please enter a port number");
 		if (portNum == null) {
 			running = false;
 			return;
@@ -183,25 +183,30 @@ class ChatClient {
 			//setting status of user to active
 			((DefaultListModel<String>) status.getModel()).addElement(userName + " - Active");
 			map.put(userName, "Active");
+			String S = input.readLine();
+			
+			// duplicate user
+			if (!S.equals("")) {
+				JOptionPane.showMessageDialog(null, userName);
+				window1.dispose();
+				login();
+				running = false;
+				return null;
+			}
 			
 			// updates status of everyone else on the server
 			while (true) {
 				
 				// get username
 				String userName = input.readLine();
+				
 				if (userName == null || userName.equals("")) {
 					break;
 				}
-				// duplicate user
-				if (userName.equals("Username exists!")) {
-					JOptionPane.showMessageDialog(null, userName);
-					window1.dispose();
-					login();
-					running = false;
-					return null;
-				}
+				System.out.println("PRE" + userName);
 				//get the status that the user would like to change to
 				int statusNum = Integer.parseInt(input.readLine());
+				System.out.println(statusNum);
 				String statusStr = "";
 				//Changed user status based on the user's command
 				if (statusNum == 1) {
@@ -216,6 +221,7 @@ class ChatClient {
 					continue;
 				}
 				//updating the user's new status
+				System.out.println("ADDED");
 				((DefaultListModel<String>) status.getModel()).addElement(userName + " - " + statusStr);
 				map.put(userName, statusStr);
 			}
@@ -336,8 +342,9 @@ class ChatClient {
 							}
 							
 							// new user joining
+							System.out.println("AF" + user);
 							if (!map.containsKey(user)) {
-								System.out.println(user);
+								
 								((DefaultListModel<String>) status.getModel()).addElement(user + " - " + statusStr);
 								msgArea.append(user + " joined the chat.\n");
 								map.put(user, statusStr);
