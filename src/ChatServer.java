@@ -84,6 +84,7 @@ class ChatServer {
 					pw.println("");
 					pw.flush();
 				}
+				count++;
 
 				System.out.println(userName + " joined.");
 

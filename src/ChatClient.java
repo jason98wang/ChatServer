@@ -28,6 +28,7 @@ class ChatClient {
 	private String userName;
 	JFrame window1;
 	private Vector<String> listData;
+	private static int count = 0;
 	private ArrayList<String> blockedUsers;
 	private HashMap<String, String> map;
 
@@ -224,6 +225,7 @@ class ChatClient {
 					continue;
 				}
 				//updating the user's new status
+				System.out.println(status.getSize());
 				listData.addElement(userName + " - " + statusStr);
 				status.setListData(listData);
 				status.revalidate();
@@ -279,6 +281,8 @@ class ChatClient {
 								}
 								
 								// exit
+								output.print(userName);
+								output.println("/status 2");
 								window1.dispose();
 								JOptionPane.showMessageDialog(null, "You have been banned");
 								running = false;
@@ -298,6 +302,8 @@ class ChatClient {
 								}
 								
 								// exit window
+								output.println(userName);
+								output.println("/status 2");
 								window1.dispose();
 								JOptionPane.showMessageDialog(null, "You have been Kicked");
 								running = false;
