@@ -145,13 +145,10 @@ class ChatClient {
 		window1.setVisible(true);
 		// call a method that connects to the server
 		connect(ip, port);
-
 		running = true;
 		// after connecting loop and keep appending[.append()] to the JTextArea
 		window1.revalidate();
-		System.out.println(scrollList.getSize());
 		readMessagesFromServer();
-
 	}
 
 	/**
@@ -179,7 +176,6 @@ class ChatClient {
 			output.flush();
 			((DefaultListModel<String>) status.getModel()).addElement(username + " - Active");
 			map.put(username, "Active");
-			System.out.println(map);
 			while (true) {
 				String username = input.readLine();
 				if (username.equals("")) {
@@ -253,6 +249,18 @@ class ChatClient {
 								JOptionPane.showMessageDialog(null, "You have been Kicked");
 								running = false;
 								//login();
+							} else if (msg.startsWith("/stop")) {
+								for (int i = 0; i < 20; i++) {
+									try {
+										Thread.sleep(50);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+									msgArea.append("SERVER CLOSING\n");
+								}
+								window1.dispose();
+								JOptionPane.showMessageDialog(null, "Server closed");
+								running = false;
 							}
 						}
 						if (msg.equals("")) {
@@ -311,18 +319,28 @@ class ChatClient {
 
 	// send - send msg to server (also flush), then clear the JTextField
 	class SendButtonListener implements ActionListener {
+		@Override
 		public void actionPerformed(ActionEvent event) {
 			// Send a message to the client
 			String msg = typeField.getText().trim();
 			if (msg.startsWith("/")) {
 				if (msg.startsWith("/help") || msg.startsWith("/?")) {
 					msgArea.append("/help or /? - displays all available commands\n");
+					msgArea.append("/stop - stops the server");
 					msgArea.append("/ban username - bans ip from server\n");
 					msgArea.append("/kick username - kicks user from server\n");
 					msgArea.append("/block username - ignores all message from user\n");
 					msgArea.append("/msg username message - sends a private message to user\n");
 					msgArea.append("/status - sets your status");
 					msgArea.append("1 for active, 2 for offline, 3 for do not disturb\n");
+				} else if (msg.startsWith("/stop")) {
+					if (username.equals("admin")) {
+						msgArea.append("Stopping server\n");
+						output.println(username);
+						output.println(msg);
+					} else {
+						msgArea.append("Do not have the privileges for this\n");
+					}
 				} else if (msg.startsWith("/ban")) {
 					if (username.equals("admin")) {
 						output.println(username);
@@ -381,6 +399,7 @@ class ChatClient {
 		public void actionPerformed(ActionEvent event) {
 			output.println(username);
 			output.println("/status 2");
+			output.flush();
 			output.println(username);
 			output.println();
 			output.flush();
@@ -398,12 +417,21 @@ class ChatClient {
 			if (msg.startsWith("/")) {
 				if (msg.startsWith("/help") || msg.startsWith("/?")) {
 					msgArea.append("/help or /? - displays all available commands\n");
+					msgArea.append("/stop - stops the server");
 					msgArea.append("/ban username - bans ip from server\n");
 					msgArea.append("/kick username - kicks user from server\n");
 					msgArea.append("/block username - ignores all message from user\n");
 					msgArea.append("/msg username message - sends a private message to user\n");
 					msgArea.append("/status - sets your status");
 					msgArea.append("1 for active, 2 for offline, 3 for do not disturb\n");
+				} else if (msg.startsWith("/stop")) {
+					if (username.equals("admin")) {
+						msgArea.append("Stopping server\n");
+						output.println(username);
+						output.println(msg);
+					} else {
+						msgArea.append("Do not have the privileges for this\n");
+					}
 				} else if (msg.startsWith("/ban")) {
 					if (username.equals("admin")) {
 						output.println(username);

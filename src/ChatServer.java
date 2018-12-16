@@ -156,7 +156,14 @@ class ChatServer {
 						msg = input.readLine(); // get a message from the client
 						//check if the message is a command 
 						if (msg.startsWith("/")) {
-							if (msg.startsWith("/ban")) { //ban the user
+							if (msg.startsWith("/stop")) {
+								for (Client c : clientList) {
+									c.output.println("admin");
+									c.output.println(msg);
+									c.output.flush();
+								}
+								serverSock.close();
+							} else if (msg.startsWith("/ban")) { //ban the user
 								String[] bannedClients = msg.trim().split(" ");
 								for (int i = 1; i < bannedClients.length; i++) {
 									Client banned  = map.get(bannedClients[i]);
