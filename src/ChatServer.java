@@ -64,6 +64,7 @@ class ChatServer {
 				if (bannedIps.contains(client.getInetAddress())) {
 					System.out.println("Banned ip tried to connect");
 					client.close();
+					continue;
 				}
 
 				//establishing input streams 
@@ -78,9 +79,10 @@ class ChatServer {
 					pw.println("Username exists!");
 					pw.flush();
 					client.close();
+					continue;
 				}
 
-				
+				System.out.println(userName + " joined.");
 
 				//add the client to the client list and set as active
 				for (Client c : clientList) {

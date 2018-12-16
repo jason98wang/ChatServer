@@ -189,7 +189,7 @@ class ChatClient {
 				
 				// get username
 				String userName = input.readLine();
-				if (userName == null) {
+				if (userName == null || userName.equals("")) {
 					break;
 				}
 				// duplicate user
