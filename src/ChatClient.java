@@ -14,6 +14,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.awt.event.*;
 import java.util.HashMap;
+import java.util.Vector;
 
 class ChatClient {
 
@@ -26,6 +27,7 @@ class ChatClient {
 	private boolean running; // thread status via boolean
 	private String userName;
 	JFrame window1;
+	private Vector<String> listData;
 	private ArrayList<String> blockedUsers;
 	private HashMap<String, String> map;
 
@@ -107,6 +109,7 @@ class ChatClient {
 		//Creating the chat client UI
 		blockedUsers = new ArrayList<String>();
 		map = new HashMap<String,String>();
+		listData = new Vector<String>();
 		window1 = new JFrame("Chat Client");
 		JPanel southPanel = new JPanel();
 		southPanel.setLayout(new GridLayout(2, 0));
@@ -131,8 +134,7 @@ class ChatClient {
 		southPanel.add(sendButton);
 		southPanel.add(errorLabel);
 		southPanel.add(clearButton);
-		DefaultListModel<String> model = new DefaultListModel<String>();
-		status = new JList<String>(model);
+		status = new JList<String>();
 
 		//adding and setting size of scroll wheel
 		JScrollPane scrollList = new JScrollPane(status, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -181,7 +183,10 @@ class ChatClient {
 			output.flush();
 			
 			//setting status of user to active
-			((DefaultListModel<String>) status.getModel()).addElement(userName + " - Active");
+			listData.add(userName + " - Active");
+			status.setListData(listData);
+			status.revalidate();
+			status.repaint();
 			map.put(userName, "Active");
 			String S = input.readLine();
 			
@@ -221,8 +226,10 @@ class ChatClient {
 					continue;
 				}
 				//updating the user's new status
-				System.out.println("ADDED");
-				((DefaultListModel<String>) status.getModel()).addElement(userName + " - " + statusStr);
+				listData.addElement(userName + " - " + statusStr);
+				status.setListData(listData);
+				status.revalidate();
+				status.repaint();
 				map.put(userName, statusStr);
 			}
 		} catch (IOException e) { // connection error occurred
@@ -345,17 +352,22 @@ class ChatClient {
 							System.out.println("AF" + user);
 							if (!map.containsKey(user)) {
 								
-								((DefaultListModel<String>) status.getModel()).addElement(user + " - " + statusStr);
+								listData.addElement(user + " - " + statusStr);
+								status.setListData(listData);
+								status.revalidate();
+								status.repaint();
 								msgArea.append(user + " joined the chat.\n");
 								map.put(user, statusStr);
 							} else {
 									
 								// update status and not new
 								for (int i = 0; i < status.getModel().getSize(); i++) {
-									if (((DefaultListModel<String>) status.getModel()).getElementAt(i)
+									if (listData.get(i)
 											.startsWith(user + " ")) {
-										((DefaultListModel<String>) status.getModel())
-												.setElementAt(user + " - " + statusStr, i);
+										listData.setElementAt(user + " - " + statusStr, i);
+										status.setListData(listData);
+										status.revalidate();
+										status.repaint();
 										map.put(user, statusStr);
 									}
 								}
