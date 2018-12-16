@@ -183,7 +183,10 @@ class ChatClient {
 			((DefaultListModel<String>) status.getModel()).addElement(userName + " - Active");
 			map.put(userName, "Active");
 			
+			// updates status of everyone else on the server
 			while (true) {
+				
+				// get username
 				String userName = input.readLine();
 				if (userName == null || userName.equals("")) {
 					break;
@@ -199,6 +202,7 @@ class ChatClient {
 				} else if (statusNum == 3) {
 					statusStr = "Do not disturb";
 				}
+				// checks for valid status
 				if (statusStr.equals("")) {
 					continue;
 				}
@@ -229,12 +233,22 @@ class ChatClient {
 			try {
 
 				if (input.ready()) { // check for an incoming messge
-					String msg, user;
+					String msg, user, privateMessage = null;
 					user = input.readLine();
 					msg = input.readLine(); // read the message
-					if (!blockedUsers.contains(user) || user.equals("admin")) {
+					if (user.startsWith("FROM ")) {
+						privateMessage = user.substring(5);
+					}
+					// cannot block admin
+					if ((!blockedUsers.contains(user) && !blockedUsers.contains(privateMessage))|| user.equals("admin")) {
+						
+						// admin command
 						if (user.equals("admin") && msg.startsWith("/")) {
+							
+							// user is banned
 							if (msg.equals("/ban")) {
+								
+								// tell user they are banned
 								for (int i = 0; i < 20; i++) {
 									try {
 										Thread.sleep(50);
@@ -243,11 +257,17 @@ class ChatClient {
 									}
 									msgArea.append("YOU ARE BANNED");
 								}
+								
+								// exit
 								window1.dispose();
 								JOptionPane.showMessageDialog(null, "You have been banned");
 								running = false;
-								//login();
+								System.exit(-1);
+							
+								// user is kicked
 							} else if (msg.equals("/kick")) {
+								
+								// tells user they are kicked
 								for (int i = 0; i < 20; i++) {
 									try {
 										Thread.sleep(50);
@@ -256,11 +276,18 @@ class ChatClient {
 									}
 									msgArea.append("YOU ARE KICKED\n");
 								}
+								
+								// exit window
 								window1.dispose();
 								JOptionPane.showMessageDialog(null, "You have been Kicked");
 								running = false;
+								System.exit(-1);
 								//login();
+								
+								// server stop
 							} else if (msg.startsWith("/stop")) {
+								
+								// tells user that the server has stopped
 								for (int i = 0; i < 20; i++) {
 									try {
 										Thread.sleep(50);
@@ -269,13 +296,20 @@ class ChatClient {
 									}
 									msgArea.append("SERVER CLOSING\n");
 								}
+								
+								// exit window
 								window1.dispose();
 								JOptionPane.showMessageDialog(null, "Server closed");
 								running = false;
+								System.exit(-1);
 							}
 						}
+						
+						// user disconnects
 						if (msg.equals("")) {
 							msgArea.append(user + " disconnected.\n");
+							
+							// update status
 						} else if (msg.startsWith("/status")) {
 							int statusNum = Integer.parseInt(msg.split(" ")[1]);
 							String statusStr = "";
@@ -286,15 +320,21 @@ class ChatClient {
 							} else if (statusNum == 3) {
 								statusStr = "Do not disturb";
 							}
+							
+							// check for invalid status
 							if (statusStr.equals("")) {
 								break;
 							}
+							
+							// new user joining
 							if (!map.containsKey(user)) {
 								System.out.println(user);
 								((DefaultListModel<String>) status.getModel()).addElement(user + " - " + statusStr);
 								msgArea.append(user + " joined the chat.\n");
 								map.put(user, statusStr);
 							} else {
+									
+								// update status and not new
 								for (int i = 0; i < status.getModel().getSize(); i++) {
 									if (((DefaultListModel<String>) status.getModel()).getElementAt(i)
 											.startsWith(user + " ")) {
@@ -305,12 +345,14 @@ class ChatClient {
 								}
 							}
 						} else {
+							// regular user message
 							msgArea.append(user + ": " + msg + "\n");
 						}
 
 					}
 				}
 
+				// failed
 			} catch (IOException e) {
 				System.out.println("Failed to receive msg from the server");
 				e.printStackTrace();
@@ -333,7 +375,11 @@ class ChatClient {
 		public void actionPerformed(ActionEvent event) {
 			// Send a message to the client
 			String msg = typeField.getText().trim();
+			
+			// is a command
 			if (msg.startsWith("/")) {
+				
+				// displays all commands
 				if (msg.startsWith("/help") || msg.startsWith("/?")) {
 					msgArea.append("/help or /? - displays all available commands\n");
 					msgArea.append("/stop - stops the server");
@@ -343,7 +389,12 @@ class ChatClient {
 					msgArea.append("/msg userName message - sends a private message to user\n");
 					msgArea.append("/status - sets your status");
 					msgArea.append("1 for active, 2 for offline, 3 for do not disturb\n");
+				
+				// stops server
 				} else if (msg.startsWith("/stop")) {
+					
+					
+					// works only with admin
 					if (userName.equals("admin")) {
 						msgArea.append("Stopping server\n");
 						output.println(userName);
@@ -351,32 +402,47 @@ class ChatClient {
 					} else {
 						msgArea.append("Do not have the privileges for this\n");
 					}
+					
+					// ban user(s)
 				} else if (msg.startsWith("/ban")) {
+					
+					// only works with admin
 					if (userName.equals("admin")) {
 						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do not have the privileges for this\n");
 					}
+					
+					// kick user(s)
 				} else if (msg.startsWith("/kick")) {
+					
+					// only works with users
 					if (userName.equals("admin")) {
 						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do no have the privileges for this\n");
 					}
+					
+					// block user(s)
 				} else if (msg.startsWith("/block")) {
 					String[] block = msg.trim().split(" ");
 					for (int i = 1; i < block.length; i++) {
+						
+						// blocking twice unblocks
 						if (blockedUsers.contains(block[i])) {
 							blockedUsers.remove(block[i]);
 							msgArea.append("Unblocked " + block[i] + "\n");
 						} else {
+							// block user
 							blockedUsers.add(block[i]);
 							msgArea.append("Blocked " + block[i] + "\n");
 						}
 
 					}
+					
+					// message another user
 				} else if (msg.startsWith("/msg")) {
 					output.println(userName);
 					output.println(msg);
@@ -396,9 +462,11 @@ class ChatClient {
 				if (msg.equals("")) {
 					return;
 				}
+				// sends infomration to server
 				output.println(userName);
 				output.println(msg);
 			}
+			
 			output.flush();
 			typeField.setText("");
 		}
@@ -407,9 +475,12 @@ class ChatClient {
 	// QuitButtonListener - Quit the program
 	class QuitButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
+			// reports user as offline
 			output.println(userName);
 			output.println("/status 2");
 			output.flush();
+			
+			// tells everyone user has disconnected
 			output.println(userName);
 			output.println();
 			output.flush();
@@ -424,7 +495,11 @@ class ChatClient {
 		public void actionPerformed(ActionEvent event) {
 			// Send a message to the client
 			String msg = typeField.getText().trim();
+			
+			// is a command
 			if (msg.startsWith("/")) {
+				
+				// displays all commands
 				if (msg.startsWith("/help") || msg.startsWith("/?")) {
 					msgArea.append("/help or /? - displays all available commands\n");
 					msgArea.append("/stop - stops the server");
@@ -434,7 +509,12 @@ class ChatClient {
 					msgArea.append("/msg userName message - sends a private message to user\n");
 					msgArea.append("/status - sets your status");
 					msgArea.append("1 for active, 2 for offline, 3 for do not disturb\n");
+				
+				// stops server
 				} else if (msg.startsWith("/stop")) {
+					
+					
+					// works only with admin
 					if (userName.equals("admin")) {
 						msgArea.append("Stopping server\n");
 						output.println(userName);
@@ -442,32 +522,47 @@ class ChatClient {
 					} else {
 						msgArea.append("Do not have the privileges for this\n");
 					}
+					
+					// ban user(s)
 				} else if (msg.startsWith("/ban")) {
+					
+					// only works with admin
 					if (userName.equals("admin")) {
 						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do not have the privileges for this\n");
 					}
+					
+					// kick user(s)
 				} else if (msg.startsWith("/kick")) {
+					
+					// only works with users
 					if (userName.equals("admin")) {
 						output.println(userName);
 						output.println(msg);
 					} else {
 						msgArea.append("Do no have the privileges for this\n");
 					}
+					
+					// block user(s)
 				} else if (msg.startsWith("/block")) {
 					String[] block = msg.trim().split(" ");
 					for (int i = 1; i < block.length; i++) {
+						
+						// blocking twice unblocks
 						if (blockedUsers.contains(block[i])) {
 							blockedUsers.remove(block[i]);
 							msgArea.append("Unblocked " + block[i] + "\n");
 						} else {
+							// block user
 							blockedUsers.add(block[i]);
 							msgArea.append("Blocked " + block[i] + "\n");
 						}
 
 					}
+					
+					// message another user
 				} else if (msg.startsWith("/msg")) {
 					output.println(userName);
 					output.println(msg);
@@ -487,12 +582,13 @@ class ChatClient {
 				if (msg.equals("")) {
 					return;
 				}
+				// sends infomration to server
 				output.println(userName);
 				output.println(msg);
 			}
+			
 			output.flush();
 			typeField.setText("");
 		}
-
 	}
 }
