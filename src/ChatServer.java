@@ -1,4 +1,4 @@
-/* [ChatServer.java]
+/** [ChatServer.java]
  * Chat server that broadcasts messages to all clients and handles various commands
  * Author: Jason Wang, Eric Long 
  * December 10, 2018
@@ -116,7 +116,7 @@ class ChatServer {
 		private Socket client; // keeps track of the client socket
 		private boolean running;
 
-		/*
+		/**
 		 * ConnectionHandler Constructor
 		 * 
 		 * @param the socket belonging to this client connection
@@ -133,7 +133,7 @@ class ChatServer {
 			running = true;
 		} // end of constructor
 
-		/*
+		/**
 		 * run 
 		 * executed on start of thread
 		 */
@@ -150,26 +150,41 @@ class ChatServer {
 						//check if the message is a command 
 						if (msg.startsWith("/")) {
 							if (msg.startsWith("/stop")) {
+								// tells all clients that the server is closing, only admin can close
 								for (Client c : clientList) {
 									c.output.println("admin");
 									c.output.println(msg);
 									c.output.flush();
 								}
+								// close server
 								serverSock.close();
 							} else if (msg.startsWith("/ban")) { //ban the user
+								// can ban multiple clients at the same time
 								String[] bannedClients = msg.trim().split(" ");
 								for (int i = 1; i < bannedClients.length; i++) {
 									Client banned = map.get(bannedClients[i]);
+									// client name is not a real client
+									if (banned == null) {
+										continue;
+									}
+									// put in ip list
 									bannedIps.add(banned.client.getInetAddress());
+									// tell banned client that they have been banned
 									banned.output.println("admin");
 									banned.output.println("/ban");
 									banned.output.flush();
 									banned.client.close();
 								}
 							} else if (msg.startsWith("/kick")) { //kick the user
+								// Multiple clients can be banned
 								String[] kickedClients = msg.trim().split(" ");
 								for (int i = 1; i < kickedClients.length; i++) {
 									Client kicked = map.get(kickedClients[i]);
+									// client name is not a real client
+									if (kicked == null) {
+										continue;
+									}
+									// tells kicked client that they have been kicked
 									kicked.output.println("admin");
 									kicked.output.println("/kick");
 									kicked.output.flush();
@@ -177,30 +192,46 @@ class ChatServer {
 								}
 							} else if (msg.startsWith("/msg")) { //send private message to a user
 								String tmp = msg;
+								// Seperates /msg and the rest of the command
 								if (tmp.indexOf(" ") >= 0) {
 									tmp = tmp.substring(tmp.indexOf(" ") + 1);
 								} else {
 									return;
 								}
+								// seperates receiver and msg
 								String user = "";
 								if (tmp.indexOf(" ") >= 0) {
 									user = tmp.substring(0, tmp.indexOf(" "));
 									tmp = tmp.substring(tmp.indexOf(" ") + 1);
 								}
+								// if there is a message
 								if (!tmp.equals("")) {
+									
+									// makes sure messaged client is valid
 									Client messaged = map.get(user);
+									if (messaged == null) {
+										continue;
+									}
 									Client sent = map.get(username);
-									messaged.output.println("FROM: " + username);
+									
+									// sends message
+									messaged.output.println("FROM " + username);
 									messaged.output.println(tmp);
 									messaged.output.flush();
-									sent.output.println("TO: " + user);
+									
+									// records sent message
+									sent.output.println("TO " + user);
 									sent.output.println(tmp);
 									sent.output.flush();
 								}
 							} else if (msg.startsWith("/status")) { //change user status
 								String[] read = msg.split(" ");
 								Client current = map.get(username);
+								
+								// gets status and updates it
 								current.status = Integer.parseInt(read[1]);
+								
+								// tells all the clients that the user updated their status
 								for (Client c : clientList) {
 									c.output.println(username);
 									c.output.println(msg);
@@ -223,9 +254,6 @@ class ChatServer {
 				}
 			}
 
-			// Send a message to the client
-			output.println("We got your message! Goodbye.");
-			output.flush();
 
 			// close the socket
 			try {
@@ -255,8 +283,8 @@ class ChatServer {
 		 */
 		Client(Socket s, String userName) {
 			user = userName;
-			map.put(user, this);
-			status = 1;
+			map.put(user, this); // adds user to map
+			status = 1; // intially status is active
 			client = s; // constructor assigns client to this
 			try { // assign all connections to client
 				output = new PrintWriter(client.getOutputStream());
@@ -269,13 +297,16 @@ class ChatServer {
 		} // end of constructor
 
 	}
-
+	
+	// displays the ip
 	public class displayServer implements Runnable {
 		public void run() {
 			try {
+				// get ip and display
 				InetAddress ip = InetAddress.getLocalHost();
 				JOptionPane.showMessageDialog(null, "Server IP: " + ip);
 			} catch (UnknownHostException e2) {
+				// problem with getting ip
 				JOptionPane.showMessageDialog(null, "Error receiving Ip Address");
 			}
 			return;
