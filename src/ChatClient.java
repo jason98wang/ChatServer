@@ -277,13 +277,10 @@ class ChatClient {
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
-									msgArea.append("YOU ARE BANNED");
+									msgArea.append("YOU ARE BANNED\n");
 								}
 								
 								// exit
-								output.print(userName);
-								output.println("/status 2");
-								output.flush();
 								window1.dispose();
 								JOptionPane.showMessageDialog(null, "You have been banned");
 								running = false;
@@ -303,9 +300,6 @@ class ChatClient {
 								}
 								
 								// exit window
-								output.println(userName);
-								output.println("/status 2");
-								output.flush();
 								window1.dispose();
 								JOptionPane.showMessageDialog(null, "You have been Kicked");
 								running = false;
