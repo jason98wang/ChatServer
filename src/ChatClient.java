@@ -25,8 +25,8 @@ class ChatClient {
 	private boolean running; // thread status via boolean
 	private String username;
 	JFrame window1;
-	private ArrayList<String> blockedUsers = new ArrayList<String>();
-	private HashMap<String, String> map = new HashMap<String, String>();
+	private ArrayList<String> blockedUsers;
+	private HashMap<String, String> map;
 
 	// private static ChatClient cc = new ChatClient();
 	/**
@@ -102,6 +102,8 @@ class ChatClient {
 	 */
 	public void go(String username1, String ip, int port) {
 		//Creating the chat client UI
+		blockedUsers = new ArrayList<String>();
+		map = new HashMap<String,String>();
 		window1 = new JFrame("Chat Client");
 		JPanel southPanel = new JPanel();
 		southPanel.setLayout(new GridLayout(2, 0));
@@ -142,8 +144,6 @@ class ChatClient {
 		connect(ip, port);
 
 		running = true;
-		blockedUsers = new ArrayList<String>();
-		map = new HashMap<String, String>();
 		// after connecting loop and keep appending[.append()] to the JTextArea
 		window1.revalidate();
 		readMessagesFromServer();
@@ -175,6 +175,7 @@ class ChatClient {
 			output.flush();
 			((DefaultListModel<String>) status.getModel()).addElement(username + " - Active");
 			map.put(username, "Active");
+			System.out.println(map);
 			while (true) {
 				String username = input.readLine();
 				if (username.equals("")) {
@@ -188,6 +189,9 @@ class ChatClient {
 					statusStr = "Offline";
 				} else if (statusNum == 3) {
 					statusStr = "Do not disturb";
+				}
+				if (statusStr.equals("")) {
+					continue;
 				}
 				((DefaultListModel<String>) status.getModel()).addElement(username + " - " + statusStr);
 				map.put(username, statusStr);
@@ -259,7 +263,12 @@ class ChatClient {
 							} else if (statusNum == 3) {
 								statusStr = "Do not disturb";
 							}
+							if (statusStr.equals("")) {
+								break;
+							}
+							System.out.println(map);
 							if (!map.containsKey(user)) {
+								System.out.println(user);
 								((DefaultListModel<String>) status.getModel()).addElement(user + " - " + statusStr);
 								msgArea.append(user + " joined the chat.\n");
 								map.put(user, statusStr);
@@ -341,7 +350,7 @@ class ChatClient {
 					output.println(msg);
 				} else if (msg.startsWith("/status")) {
 					String[] split = msg.split(" ");
-					if (split.length == 2 && split[1].matches("[0-2]")) {
+					if (split.length == 2 && split[1].matches("[1-3]")) {
 						output.println(username);
 						output.println(msg);
 					} else {
@@ -422,7 +431,7 @@ class ChatClient {
 					output.println(msg);
 				} else if (msg.startsWith("/status")) {
 					String[] split = msg.split(" ");
-					if (split.length == 2 && split[1].matches("[0-2]")) {
+					if (split.length == 2 && split[1].matches("[1-3]")) {
 						output.println(username);
 						output.println(msg);
 					} else {
