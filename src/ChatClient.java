@@ -121,6 +121,7 @@ class ChatClient {
 		userName = username1;
 		typeField = new JTextField(10);
 
+		//creating message area and setting it as not editable 
 		msgArea = new JTextArea();
 		msgArea.setEditable(false);
 

@@ -1,4 +1,4 @@
-/** [ChatServer.java]
+/* [ChatServer.java]
  * Chat server that broadcasts messages to all clients and handles various commands
  * Author: Jason Wang, Eric Long 
  * December 10, 2018
@@ -187,7 +187,7 @@ class ChatServer {
 									banned.client.close();
 									clientList.remove(banned);
 									for (Client c : clientList) {
-										c.output.println(kicked.user);
+										c.output.println(banned.user);
 										c.output.println("/status 2");
 										c.output.flush();
 									}
@@ -210,7 +210,7 @@ class ChatServer {
 									clientList.remove(kicked);
 									for (Client c : clientList) {
 										c.output.println(kicked.user);
-										c.output.println("/status 2);
+										c.output.println("/status 2");
 										c.output.flush();
 									}
 								}
